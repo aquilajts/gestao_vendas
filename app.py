@@ -74,7 +74,7 @@ def index():
 @app.route('/salvar', methods=['POST'])
 def salvar():
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return 'Usuário não autenticado', 403
 
     dados = request.form
     cliente = dados['cliente']
@@ -93,15 +93,25 @@ def salvar():
 
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-        if placa:
-            c.execute("DELETE FROM vendas WHERE placa = ?", (placa,))
+
+        # Verificar se telefone já está cadastrado
+        c.execute("SELECT cliente, placa FROM vendas WHERE telefone = ?", (telefone,))
+        duplicado = c.fetchone()
+        if duplicado:
+            return jsonify({
+                'status': 'duplicado',
+                'cliente': duplicado[0],
+                'placa': duplicado[1]
+            })
+
+        # Inserir venda nova (sem apagar outra se placa estiver vazia)
         c.execute('''INSERT INTO vendas (
                         cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                   (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario))
         conn.commit()
 
-    return 'OK'
+    return jsonify({'status': 'ok'})
 
 @app.route('/vendas')
 def listar_vendas():
