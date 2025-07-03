@@ -70,23 +70,37 @@ def index():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     return render_template('index.html')
-
+    
+def to_float(valor):
+    try:
+        return float(valor)
+    except (ValueError, TypeError):
+        return 0.0
+        
 @app.route('/salvar', methods=['POST'])
 def salvar():
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return jsonify({'status': 'erro', 'msg': 'Usuário não autenticado'}), 401
 
     dados = request.form
-    cliente = dados['cliente']
-    telefone = dados['telefone']
-    veiculo = dados['veiculo']
-    placa = dados['placa']
-    fipe = dados['fipe']
-    mensalidade = dados['mensalidade']
-    desconto = dados['desconto']
-    participacao = dados['participacao']
-    descTexto = dados['descTexto']
-    obs = dados['obs']
+    cliente = dados.get('cliente')
+    telefone = dados.get('telefone')
+    veiculo = dados.get('veiculo')
+    placa = dados.get('placa')
+
+    def to_float(v):
+        try:
+            return float(v)
+        except:
+            return 0.0
+
+    fipe = to_float(dados.get('fipe'))
+    mensalidade = to_float(dados.get('mensalidade'))
+    desconto = to_float(dados.get('desconto'))
+    participacao = to_float(dados.get('participacao'))
+
+    descTexto = dados.get('descTexto', '')
+    obs = dados.get('obs', '')
     usuario = session['usuario']
 
     data = datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -102,7 +116,8 @@ def salvar():
                   (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario))
         conn.commit()
 
-    return 'OK'
+    return jsonify({'status': 'ok'})
+
 
 @app.route('/vendas')
 def listar_vendas():
