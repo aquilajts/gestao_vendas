@@ -74,7 +74,7 @@ def index():
 @app.route('/salvar', methods=['POST'])
 def salvar():
     if 'usuario' not in session:
-        return 'Usuário não autenticado', 403
+        return redirect(url_for('login'))
 
     dados = request.form
     cliente = dados['cliente']
@@ -93,25 +93,16 @@ def salvar():
 
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-
-        # Verificar se telefone já está cadastrado
-        c.execute("SELECT cliente, placa FROM vendas WHERE telefone = ?", (telefone,))
-        duplicado = c.fetchone()
-        if duplicado:
-            return jsonify({
-                'status': 'duplicado',
-                'cliente': duplicado[0],
-                'placa': duplicado[1]
-            })
-
-        # Inserir venda nova (sem apagar outra se placa estiver vazia)
+        if placa:
+            if usuario not in ['Masterconf', 'Confiauto']:
+                c.execute("DELETE FROM vendas WHERE placa = ? AND usuario = ?", (placa, usuario))
         c.execute('''INSERT INTO vendas (
                         cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                   (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario))
         conn.commit()
 
-    return jsonify({'status': 'ok'})
+    return 'OK'
 
 @app.route('/vendas')
 def listar_vendas():
@@ -122,9 +113,9 @@ def listar_vendas():
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
         if usuario in ['Masterconf', 'Confiauto']:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas ORDER BY data DESC")
+            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario FROM vendas ORDER BY data DESC")
         else:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas WHERE usuario = ? ORDER BY data DESC", (usuario,))
+            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario FROM vendas WHERE usuario = ? ORDER BY data DESC", (usuario,))
         vendas = c.fetchall()
     return jsonify([{
         'cliente': v[0],
@@ -137,7 +128,8 @@ def listar_vendas():
         'participacao': v[7],
         'descTexto': v[8],
         'obs': v[9],
-        'data': v[10]
+        'data': v[10],
+        'usuario': v[11] if usuario in ['Masterconf', 'Confiauto'] else None
     } for v in vendas])
 
 @app.route('/excluir', methods=['DELETE'])
@@ -145,11 +137,16 @@ def excluir():
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
+    usuario = session['usuario']
     placa = request.args.get('placa')
     data = request.args.get('data')
+
+    if usuario in ['Masterconf', 'Confiauto']:
+        return 'Proibido excluir com conta master', 403
+
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-        c.execute("DELETE FROM vendas WHERE placa = ? AND data = ?", (placa, data))
+        c.execute("DELETE FROM vendas WHERE placa = ? AND data = ? AND usuario = ?", (placa, data, usuario))
         conn.commit()
     return 'Excluído'
 
