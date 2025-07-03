@@ -12,25 +12,25 @@
     async function salvarVenda() {
       const form = document.getElementById('form');
       const formData = new FormData(form);
-      const telefone = formData.get("telefone");
-      const cliente = formData.get("cliente");
-
-      const response = await fetch('/vendas');
-      const vendas = await response.json();
-
-      const duplicada = vendas.find(v => v.telefone === telefone);
-      if (duplicada) {
-        const confirma = confirm(`Esse número já está cadastrado no Cliente \"${duplicada.cliente}\" Placa \"${duplicada.placa}\". Deseja substituir?`);
-        if (!confirma) return;
-      }
-
-      await fetch('/salvar', {
+    
+      const response = await fetch('/salvar', {
         method: 'POST',
         body: formData
       });
+    
+      const resultado = await response.json();
+    
+      if (resultado.status === 'duplicado') {
+        const confirmar = confirm(`Esse número já está cadastrado no cliente "${resultado.cliente}" com a placa "${resultado.placa}". Deseja substituir?`);
+        if (!confirmar) return;
+    
+        // Envia novamente, agora permitindo duplicidade
+        await fetch('/excluir?placa=' + encodeURIComponent(resultado.placa) + '&data=', { method: 'DELETE' });
+        await fetch('/salvar', { method: 'POST', body: formData });
+      }
+    
       form.reset();
       atualizarHistorico();
-    }
 
     async function atualizarHistorico() {
       const response = await fetch('/vendas');
