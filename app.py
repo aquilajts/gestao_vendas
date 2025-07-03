@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
 from datetime import datetime
@@ -12,7 +12,7 @@ def init_db():
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS vendas (
                         cliente TEXT,
-                        telefone TEXT,
+                        telefone TEXT UNIQUE,
                         veiculo TEXT,
                         placa TEXT,
                         fipe REAL,
@@ -30,21 +30,21 @@ def salvar():
     dados = request.form
     cliente = dados['cliente']
     telefone = dados['telefone']
-    veiculo = dados['veiculo']
-    placa = dados['placa']
-    fipe = dados['fipe']
-    mensalidade = dados['mensalidade']
-    desconto = dados['desconto']
-    participacao = dados['participacao']
-    descTexto = dados['descTexto']
-    obs = dados['obs']
+    veiculo = dados.get('veiculo', '')
+    placa = dados.get('placa', '')
+    fipe = dados.get('fipe', 0)
+    mensalidade = dados.get('mensalidade', 0)
+    desconto = dados.get('desconto', 0)
+    participacao = dados.get('participacao', 0)
+    descTexto = dados.get('descTexto', '')
+    obs = dados.get('obs', '')
 
     data = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-    # remove venda antiga com mesma placa (evita duplicata)
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-        c.execute("DELETE FROM vendas WHERE placa = ?", (placa,))
+        # remove venda antiga com mesmo telefone
+        c.execute("DELETE FROM vendas WHERE telefone = ?", (telefone,))
         c.execute('''INSERT INTO vendas (
                         cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
@@ -87,5 +87,6 @@ def excluir():
 def index():
     return render_template('index.html')
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+if __name__ == '__main__':
+    init_db()
+    app.run(debug=True)
