@@ -14,14 +14,25 @@
     async function salvarVenda() {
       const form = document.getElementById('form');
       const formData = new FormData(form);
+
       const response = await fetch('/salvar', {
         method: 'POST',
         body: formData
       });
 
-      if (response.ok) {
+      const resultado = await response.json();
+
+      if (resultado.status === 'ok') {
         form.reset();
         atualizarHistorico();
+      } else if (resultado.status === 'duplicado') {
+        const confirmar = confirm(`Esse número já está cadastrado no cliente "${resultado.cliente}" com a placa "${resultado.placa}". Deseja substituir?`);
+        if (confirmar) {
+          await fetch(`/excluir?placa=${encodeURIComponent(resultado.placa)}&data=`, { method: 'DELETE' });
+          await fetch('/salvar', { method: 'POST', body: formData });
+          form.reset();
+          atualizarHistorico();
+        }
       }
     }
 
