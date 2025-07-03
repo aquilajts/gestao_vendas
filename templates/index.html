@@ -12,6 +12,18 @@
     async function salvarVenda() {
       const form = document.getElementById('form');
       const formData = new FormData(form);
+      const telefone = formData.get("telefone");
+      const cliente = formData.get("cliente");
+
+      const response = await fetch('/vendas');
+      const vendas = await response.json();
+
+      const duplicada = vendas.find(v => v.telefone === telefone);
+      if (duplicada) {
+        const confirma = confirm(`Esse número já está cadastrado no Cliente \"${duplicada.cliente}\" Placa \"${duplicada.placa}\". Deseja substituir?`);
+        if (!confirma) return;
+      }
+
       await fetch('/salvar', {
         method: 'POST',
         body: formData
@@ -99,9 +111,14 @@
       <form id="form" onsubmit="event.preventDefault(); salvarVenda();" class="space-y-3">
         <input id="cliente" name="cliente" required class="w-full p-2 bg-gray-800 rounded" placeholder="Nome do Cliente" />
         <input id="telefone" name="telefone" required class="w-full p-2 bg-gray-800 rounded" placeholder="Telefone" />
-        <input id="veiculo" name="veiculo" required class="w-full p-2 bg-gray-800 rounded" placeholder="Veículo (ex: Honda Civic 2020)" />
-        <input id="placa" name="placa" required class="w-full p-2 bg-gray-800 rounded" placeholder="Placa" />
-        <input id="fipe" name="fipe" required class="w-full p-2 bg-gray-800 rounded" placeholder="FIPE" type="number" step="0.01" />
+        <input id="veiculo" name="veiculo" class="w-full p-2 bg-gray-800 rounded" placeholder="Veículo (ex: Honda Civic 2020)" />
+        <div class="flex items-center gap-2">
+          <input id="placa" name="placa" class="w-full p-2 bg-gray-800 rounded" placeholder="Placa" />
+          <label class="text-sm flex items-center gap-1">
+            <input type="checkbox" id="semPlacaCheck" onclick="document.getElementById('placa').disabled = this.checked; if (this.checked) document.getElementById('placa').value = '';"> Sem Placa
+          </label>
+        </div>
+        <input id="fipe" name="fipe" class="w-full p-2 bg-gray-800 rounded" placeholder="FIPE" type="number" step="0.01" />
         <input id="mensalidade" name="mensalidade" class="w-full p-2 bg-gray-800 rounded" placeholder="Mensalidade (Original)" type="number" step="0.01" />
         <input id="desconto" name="desconto" class="w-full p-2 bg-gray-800 rounded" placeholder="Mensalidade (Com Desconto)" type="number" step="0.01" />
         <input id="participacao" name="participacao" class="w-full p-2 bg-gray-800 rounded" placeholder="Taxa de Participação" type="number" step="0.01" />
