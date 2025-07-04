@@ -3,34 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Vendas</title>
+  <title>Gestão de Vendas</title>
+  <link rel="icon" href="data:,">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script>
     let dadosGlobais = [];
-    let idAtual = "";
+    let idUsuario = "";
 
-    async function carregarID() {
-      const res = await fetch('/usuario');
-      const data = await res.json();
-      idAtual = data.id || "";
-      if (idAtual === "Confiautomaster" || idAtual === "Acessorestrito") {
-        document.getElementById("form-container").style.display = "none";
-        document.querySelectorAll(".editar, .excluir").forEach(btn => btn.style.display = "none");
+    async function verificarTipo() {
+      const res = await fetch('/id');
+      const { id, isMaster } = await res.json();
+      idUsuario = id;
+      document.getElementById('id-logado').innerText = "ID: " + id;
+
+      if (isMaster) {
+        document.getElementById('formulario-nova-venda').style.display = 'none';
       }
+
+      atualizarHistorico(isMaster);
     }
 
     async function salvarVenda() {
       const form = document.getElementById('form');
       const formData = new FormData(form);
-
       const telefone = formData.get("telefone");
+      const cliente = formData.get("cliente");
 
       const response = await fetch('/vendas');
       const vendas = await response.json();
 
       const duplicada = vendas.find(v => v.telefone === telefone);
       if (duplicada) {
-        const confirma = confirm(`Esse número já está cadastrado no Cliente "${duplicada.cliente}" Placa "${duplicada.placa}". Deseja substituir?`);
+        const confirma = confirm(`Esse número já está cadastrado no Cliente \"${duplicada.cliente}\" Placa \"${duplicada.placa}\". Deseja substituir?`);
         if (!confirma) return;
       }
 
@@ -39,16 +43,16 @@
         body: formData
       });
       form.reset();
-      atualizarHistorico();
+      verificarTipo();
     }
 
-    async function atualizarHistorico() {
+    async function atualizarHistorico(isMaster) {
       const response = await fetch('/vendas');
       const data = await response.json();
       dadosGlobais = data;
-
       const tbody = document.getElementById('historico-body');
       tbody.innerHTML = "";
+
       data.forEach((v, i) => {
         const tr = document.createElement('tr');
         tr.className = 'border-b border-gray-700';
@@ -71,16 +75,14 @@
           <td class='p-2'>${v.descTexto}</td>
           <td class='p-2'>${v.obs}</td>
           <td class='p-2 flex gap-2'>
-            <button onclick="preencherFormulario(${i})" class='text-yellow-400 editar'>✏️</button>
-            <button onclick="excluirVenda(${i})" class='text-red-500 excluir'>❌</button>
+            ${isMaster ? '' : `
+              <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
+              <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
+            `}
           </td>
         `;
         tbody.appendChild(tr);
       });
-
-      if (idAtual === "Confiautomaster" || idAtual === "Acessorestrito") {
-        document.querySelectorAll(".editar, .excluir").forEach(btn => btn.style.display = "none");
-      }
     }
 
     function copiarVenda(i) {
@@ -105,25 +107,22 @@
     }
 
     async function excluirVenda(i) {
-      if (idAtual === "Confiautomaster" || idAtual === "Acessorestrito") return;
-
       const confirmacao = confirm("Tem certeza que deseja excluir esta venda?");
       if (!confirmacao) return;
       const v = dadosGlobais[i];
       await fetch(`/excluir?placa=${encodeURIComponent(v.placa)}&data=${encodeURIComponent(v.data)}`, { method: 'DELETE' });
-      atualizarHistorico();
+      verificarTipo();
     }
 
-    window.onload = () => {
-      carregarID().then(atualizarHistorico);
-    };
+    window.onload = verificarTipo;
   </script>
 </head>
 <body class="bg-black text-white font-sans">
   <div class="max-w-5xl mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-4">Gestão de Vendas</h1>
+    <h1 class="text-3xl font-bold mb-2">Gestão de Vendas</h1>
+    <p id="id-logado" class="mb-4 text-sm text-gray-400"></p>
 
-    <div id="form-container" class="mb-6">
+    <div id="formulario-nova-venda" class="mb-6">
       <h2 class="text-xl mb-2">Nova Venda</h2>
       <form id="form" onsubmit="event.preventDefault(); salvarVenda();" class="space-y-3">
         <input id="cliente" name="cliente" required class="w-full p-2 bg-gray-800 rounded" placeholder="Nome do Cliente" />
