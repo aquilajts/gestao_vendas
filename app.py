@@ -1,11 +1,10 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, session, url_for
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
 from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
-app.secret_key = 'chave_super_secreta_para_sessao'
 
 # Banco de dados
 def init_db():
@@ -13,7 +12,7 @@ def init_db():
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS vendas (
                         cliente TEXT,
-                        telefone TEXT,
+                        telefone TEXT UNIQUE,
                         veiculo TEXT,
                         placa TEXT,
                         fipe REAL,
@@ -22,99 +21,43 @@ def init_db():
                         participacao REAL,
                         descTexto TEXT,
                         obs TEXT,
-                        data TEXT,
-                        usuario TEXT
+                        data TEXT
                     )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS usuarios (
-                        usuario TEXT PRIMARY KEY,
-                        senha TEXT
-                    )''')
-        # Inserir contas master se não existirem
-        c.execute("INSERT OR IGNORE INTO usuarios (usuario, senha) VALUES (?, ?)", ("Masterconf", "Masterconf"))
-        c.execute("INSERT OR IGNORE INTO usuarios (usuario, senha) VALUES (?, ?)", ("Confiauto", "Confiauto"))
         conn.commit()
-
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        senha = request.form['senha']
-
-        if len(usuario) < 3 or len(usuario) > 12 or len(senha) < 3 or len(senha) > 12:
-            return 'Usuário e senha devem ter entre 3 e 12 caracteres'
-
-        with sqlite3.connect('vendas.db') as conn:
-            c = conn.cursor()
-            c.execute("SELECT * FROM usuarios WHERE usuario = ?", (usuario,))
-            user = c.fetchone()
-            if user:
-                if user[1] == senha:
-                    session['usuario'] = usuario
-                    return redirect(url_for('index'))
-                else:
-                    return 'Senha incorreta'
-            else:
-                c.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", (usuario, senha))
-                conn.commit()
-                session['usuario'] = usuario
-                return redirect(url_for('index'))
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-@app.route('/index')
-def index():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    return render_template('index.html')
 
 @app.route('/salvar', methods=['POST'])
 def salvar():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
     dados = request.form
     cliente = dados['cliente']
     telefone = dados['telefone']
-    veiculo = dados['veiculo']
-    placa = dados['placa']
-    fipe = dados['fipe']
-    mensalidade = dados['mensalidade']
-    desconto = dados['desconto']
-    participacao = dados['participacao']
-    descTexto = dados['descTexto']
-    obs = dados['obs']
-    usuario = session['usuario']
+    veiculo = dados.get('veiculo', '')
+    placa = dados.get('placa', '')
+    fipe = dados.get('fipe', 0)
+    mensalidade = dados.get('mensalidade', 0)
+    desconto = dados.get('desconto', 0)
+    participacao = dados.get('participacao', 0)
+    descTexto = dados.get('descTexto', '')
+    obs = dados.get('obs', '')
 
     data = datetime.now().strftime('%d/%m/%Y %H:%M')
 
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-        if placa:
-            c.execute("DELETE FROM vendas WHERE placa = ?", (placa,))
+        # remove venda antiga com mesmo telefone
+        c.execute("DELETE FROM vendas WHERE telefone = ?", (telefone,))
         c.execute('''INSERT INTO vendas (
-                        cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                  (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario))
+                        cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                  (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data))
         conn.commit()
 
     return 'OK'
 
 @app.route('/vendas')
 def listar_vendas():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
-    usuario = session['usuario']
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-        if usuario in ['Masterconf', 'Confiauto']:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas ORDER BY data DESC")
-        else:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas WHERE usuario = ? ORDER BY data DESC", (usuario,))
+        c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas ORDER BY data DESC")
         vendas = c.fetchall()
     return jsonify([{
         'cliente': v[0],
@@ -132,9 +75,6 @@ def listar_vendas():
 
 @app.route('/excluir', methods=['DELETE'])
 def excluir():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
     placa = request.args.get('placa')
     data = request.args.get('data')
     with sqlite3.connect('vendas.db') as conn:
@@ -143,8 +83,12 @@ def excluir():
         conn.commit()
     return 'Excluído'
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 if __name__ == '__main__':
     init_db()
     import os
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # usa a porta do ambiente (Render) ou 5000 localmente
     app.run(debug=True, host='0.0.0.0', port=port)
