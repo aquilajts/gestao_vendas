@@ -70,37 +70,23 @@ def index():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     return render_template('index.html')
-    
-def to_float(valor):
-    try:
-        return float(valor)
-    except (ValueError, TypeError):
-        return 0.0
-        
+
 @app.route('/salvar', methods=['POST'])
 def salvar():
     if 'usuario' not in session:
-        return jsonify({'status': 'erro', 'msg': 'Usuário não autenticado'}), 401
+        return redirect(url_for('login'))
 
     dados = request.form
-    cliente = dados.get('cliente')
-    telefone = dados.get('telefone')
-    veiculo = dados.get('veiculo')
-    placa = dados.get('placa')
-
-    def to_float(v):
-        try:
-            return float(v)
-        except:
-            return 0.0
-
-    fipe = to_float(dados.get('fipe'))
-    mensalidade = to_float(dados.get('mensalidade'))
-    desconto = to_float(dados.get('desconto'))
-    participacao = to_float(dados.get('participacao'))
-
-    descTexto = dados.get('descTexto', '')
-    obs = dados.get('obs', '')
+    cliente = dados['cliente']
+    telefone = dados['telefone']
+    veiculo = dados['veiculo']
+    placa = dados['placa']
+    fipe = dados['fipe']
+    mensalidade = dados['mensalidade']
+    desconto = dados['desconto']
+    participacao = dados['participacao']
+    descTexto = dados['descTexto']
+    obs = dados['obs']
     usuario = session['usuario']
 
     data = datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -108,16 +94,14 @@ def salvar():
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
         if placa:
-            if usuario not in ['Masterconf', 'Confiauto']:
-                c.execute("DELETE FROM vendas WHERE placa = ? AND usuario = ?", (placa, usuario))
+            c.execute("DELETE FROM vendas WHERE placa = ?", (placa,))
         c.execute('''INSERT INTO vendas (
                         cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                   (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario))
         conn.commit()
 
-    return jsonify({'status': 'ok'})
-
+    return 'OK'
 
 @app.route('/vendas')
 def listar_vendas():
@@ -128,9 +112,9 @@ def listar_vendas():
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
         if usuario in ['Masterconf', 'Confiauto']:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario FROM vendas ORDER BY data DESC")
+            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas ORDER BY data DESC")
         else:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, usuario FROM vendas WHERE usuario = ? ORDER BY data DESC", (usuario,))
+            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas WHERE usuario = ? ORDER BY data DESC", (usuario,))
         vendas = c.fetchall()
     return jsonify([{
         'cliente': v[0],
@@ -143,8 +127,7 @@ def listar_vendas():
         'participacao': v[7],
         'descTexto': v[8],
         'obs': v[9],
-        'data': v[10],
-        'usuario': v[11] if usuario in ['Masterconf', 'Confiauto'] else None
+        'data': v[10]
     } for v in vendas])
 
 @app.route('/excluir', methods=['DELETE'])
@@ -152,16 +135,11 @@ def excluir():
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
-    usuario = session['usuario']
     placa = request.args.get('placa')
     data = request.args.get('data')
-
-    if usuario in ['Masterconf', 'Confiauto']:
-        return 'Proibido excluir com conta master', 403
-
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
-        c.execute("DELETE FROM vendas WHERE placa = ? AND data = ? AND usuario = ?", (placa, data, usuario))
+        c.execute("DELETE FROM vendas WHERE placa = ? AND data = ?", (placa, data))
         conn.commit()
     return 'Excluído'
 
