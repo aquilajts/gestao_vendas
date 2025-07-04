@@ -1,22 +1,26 @@
-from flask import Flask, request, jsonify, render_template, redirect, session
-from flask_cors import CORS
-from datetime import datetime
-import sqlite3
 import os
+import sqlite3
+from flask import Flask, request, jsonify, render_template, redirect, session
+from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'chave-secreta'
-CORS(app)
+app.secret_key = "minha_chave_secreta"
 
-DB_PATH = 'vendas.db'
-MASTERS = ['Confiautomaster', 'Acessorestrito']
+# Caminho absoluto para o banco
+DATABASE = os.path.join(os.path.dirname(__file__), 'vendas.db')
 
-def init_db():
-    with sqlite3.connect(DB_PATH) as conn:
-        c = conn.cursor()
-        c.execute('''
+# IDs mestre
+IDS_MESTRE = {"master123", "adm001", "gerente01"}
+
+def conectar():
+    return sqlite3.connect(DATABASE)
+
+def criar_tabela():
+    with conectar() as con:
+        con.execute('''
             CREATE TABLE IF NOT EXISTS vendas (
                 id TEXT,
+                data TEXT,
                 cliente TEXT,
                 telefone TEXT,
                 veiculo TEXT,
@@ -26,114 +30,112 @@ def init_db():
                 desconto REAL,
                 participacao REAL,
                 descTexto TEXT,
-                obs TEXT,
-                data TEXT
+                obs TEXT
             )
         ''')
-        conn.commit()
 
-@app.route('/')
+@app.route("/")
+def login_page():
+    return render_template("login.html")
+
+@app.route("/login", methods=["POST"])
 def login():
-    return render_template('login.html')
+    data = request.get_json()
+    id_usuario = data.get("id", "").strip()
+    if not id_usuario:
+        return "ID inválido", 400
 
-@app.route('/login', methods=['POST'])
-def fazer_login():
-    id = request.json.get('id')
-    if id and 5 <= len(id) <= 20:
-        session['id'] = id
-        return '', 200
-    return 'ID inválido.', 401
+    session["id"] = id_usuario
+    return jsonify({"ok": True})
 
-@app.route('/painel')
+@app.route("/painel")
 def painel():
-    if 'id' not in session:
-        return redirect('/')
-    return render_template('index.html')
+    if "id" not in session:
+        return redirect("/")
+    return render_template("index.html")
 
-@app.route('/salvar', methods=['POST'])
-def salvar():
-    if 'id' not in session:
-        return 'Não autorizado', 401
+@app.route("/id")
+def get_id():
+    id_usuario = session.get("id", "")
+    return jsonify({"id": id_usuario, "isMaster": id_usuario in IDS_MESTRE})
 
-    id_usuario = session['id']
-    if id_usuario in MASTERS:
-        return 'Masters não podem salvar', 403
+@app.route("/vendas")
+def listar_vendas():
+    id_usuario = session.get("id", "")
+    is_master = id_usuario in IDS_MESTRE
 
-    dados = request.form
-    cliente = dados['cliente']
-    telefone = dados['telefone']
-    veiculo = dados.get('veiculo', '')
-    placa = dados.get('placa', '')
-    fipe = float(dados.get('fipe', 0))
-    mensalidade = float(dados.get('mensalidade', 0))
-    desconto = float(dados.get('desconto', 0))
-    participacao = float(dados.get('participacao', 0))
-    descTexto = dados.get('descTexto', '')
-    obs = dados.get('obs', '')
-    data = datetime.now().strftime('%d/%m/%Y %H:%M')
-
-    with sqlite3.connect(DB_PATH) as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM vendas WHERE telefone = ? AND id = ?", (telefone, id_usuario))
-        c.execute('''
-            INSERT INTO vendas (
-                id, cliente, telefone, veiculo, placa, fipe,
-                mensalidade, desconto, participacao,
-                descTexto, obs, data
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (id_usuario, cliente, telefone, veiculo, placa, fipe,
-              mensalidade, desconto, participacao, descTexto, obs, data))
-        conn.commit()
-
-    return 'OK'
-
-@app.route('/vendas')
-def listar():
-    if 'id' not in session:
-        return jsonify([])
-
-    id_usuario = session['id']
-    with sqlite3.connect(DB_PATH) as conn:
-        c = conn.cursor()
-        if id_usuario in MASTERS:
-            c.execute("SELECT * FROM vendas ORDER BY data DESC")
+    with conectar() as con:
+        cursor = con.cursor()
+        if is_master:
+            cursor.execute("SELECT * FROM vendas ORDER BY rowid DESC")
         else:
-            c.execute("SELECT * FROM vendas WHERE id = ? ORDER BY data DESC", (id_usuario,))
-        vendas = c.fetchall()
+            cursor.execute("SELECT * FROM vendas WHERE id = ? ORDER BY rowid DESC", (id_usuario,))
+        dados = cursor.fetchall()
 
-    return jsonify([{
-        'cliente': v[1],
-        'telefone': v[2],
-        'veiculo': v[3],
-        'placa': v[4],
-        'fipe': v[5],
-        'mensalidade': v[6],
-        'desconto': v[7],
-        'participacao': v[8],
-        'descTexto': v[9],
-        'obs': v[10],
-        'data': v[11],
-        'id': v[0]
-    } for v in vendas])
+    vendas = []
+    for linha in dados:
+        vendas.append({
+            "id": linha[0],
+            "data": linha[1],
+            "cliente": linha[2],
+            "telefone": linha[3],
+            "veiculo": linha[4],
+            "placa": linha[5],
+            "fipe": linha[6],
+            "mensalidade": linha[7],
+            "desconto": linha[8],
+            "participacao": linha[9],
+            "descTexto": linha[10],
+            "obs": linha[11],
+        })
+    return jsonify(vendas)
 
-@app.route('/excluir', methods=['DELETE'])
+@app.route("/salvar", methods=["POST"])
+def salvar_venda():
+    if "id" not in session:
+        return "Não autorizado", 403
+
+    id_usuario = session["id"]
+    data = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    campos = [
+        "cliente", "telefone", "veiculo", "placa", "fipe",
+        "mensalidade", "desconto", "participacao", "descTexto", "obs"
+    ]
+    valores = [request.form.get(campo, "").strip() for campo in campos]
+
+    with conectar() as con:
+        con.execute("""
+            INSERT INTO vendas (
+                id, data, cliente, telefone, veiculo, placa, fipe,
+                mensalidade, desconto, participacao, descTexto, obs
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (id_usuario, data, *valores))
+
+    return redirect("/painel")
+
+@app.route("/excluir", methods=["DELETE"])
 def excluir():
-    if 'id' not in session:
-        return 'Não autorizado', 401
+    if "id" not in session:
+        return "Não autorizado", 403
 
-    id_usuario = session['id']
-    if id_usuario in MASTERS:
-        return 'Masters não podem excluir', 403
+    id_usuario = session["id"]
+    placa = request.args.get("placa", "").strip()
+    data = request.args.get("data", "").strip()
 
-    placa = request.args.get('placa')
-    data = request.args.get('data')
-    with sqlite3.connect(DB_PATH) as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM vendas WHERE id = ? AND placa = ? AND data = ?", (id_usuario, placa, data))
-        conn.commit()
-    return 'Excluído'
+    if not placa or not data:
+        return "Parâmetros inválidos", 400
 
-if __name__ == '__main__':
-    init_db()
-    port = int(os.environ.get("PORT", 5000))  # Porta definida automaticamente pelo Render
-    app.run(host='0.0.0.0', port=port)
+    with conectar() as con:
+        if id_usuario in IDS_MESTRE:
+            con.execute("DELETE FROM vendas WHERE placa = ? AND data = ?", (placa, data))
+        else:
+            con.execute("DELETE FROM vendas WHERE id = ? AND placa = ? AND data = ?", (id_usuario, placa, data))
+
+    return "Excluído com sucesso", 200
+
+if __name__ == "__main__":
+    criar_tabela()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
