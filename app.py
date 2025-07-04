@@ -13,19 +13,19 @@ def init_db():
     with sqlite3.connect('vendas.db') as conn:
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS vendas (
-                        id TEXT,
-                        cliente TEXT,
-                        telefone TEXT UNIQUE,
-                        veiculo TEXT,
-                        placa TEXT,
-                        fipe REAL,
-                        mensalidade REAL,
-                        desconto REAL,
-                        participacao REAL,
-                        descTexto TEXT,
-                        obs TEXT,
-                        data TEXT
-                    )''')
+                    cliente TEXT,
+                    telefone TEXT,
+                    veiculo TEXT,
+                    placa TEXT,
+                    fipe REAL,
+                    mensalidade REAL,
+                    desconto REAL,
+                    participacao REAL,
+                    descTexto TEXT,
+                    obs TEXT,
+                    data TEXT,
+                    id TEXT
+                )''')
         conn.commit()
 
 
@@ -70,46 +70,44 @@ def salvar():
         return 'Acesso negado', 403
 
     dados = request.form
-    id_usuario = session['id']
+    cliente = dados['cliente']
     telefone = dados['telefone']
+    veiculo = dados.get('veiculo', '')
+    placa = dados.get('placa', '')
+    fipe = dados.get('fipe', 0)
+    mensalidade = dados.get('mensalidade', 0)
+    desconto = dados.get('desconto', 0)
+    participacao = dados.get('participacao', 0)
+    descTexto = dados.get('descTexto', '')
+    obs = dados.get('obs', '')
+    data = datetime.now().strftime('%d/%m/%Y %H:%M')
+    id_usuario = session['id']  # <- aqui o ID do usuário logado
 
-    with sqlite3.connect('vendas.db') as conn:
+    with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
         c.execute("DELETE FROM vendas WHERE telefone = ? AND id = ?", (telefone, id_usuario))
-
         c.execute('''INSERT INTO vendas (
-                        id, cliente, telefone, veiculo, placa, fipe, mensalidade, desconto,
-                        participacao, descTexto, obs, data
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                  (id_usuario,
-                   dados['cliente'],
-                   telefone,
-                   dados.get('veiculo', ''),
-                   dados.get('placa', ''),
-                   dados.get('fipe', 0),
-                   dados.get('mensalidade', 0),
-                   dados.get('desconto', 0),
-                   dados.get('participacao', 0),
-                   dados.get('descTexto', ''),
-                   dados.get('obs', ''),
-                   datetime.now().strftime('%d/%m/%Y %H:%M')))
+            cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data, id_usuario)
+        )
         conn.commit()
+
     return 'OK'
 
 
 @app.route('/vendas')
 def listar_vendas():
     if 'id' not in session:
-        return jsonify([])
+        return 'Não autenticado', 403
 
-    id_atual = session['id']
-
-    with sqlite3.connect('vendas.db') as conn:
+    id_usuario = session['id']
+    with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
-        if id_atual in ["Confiautomaster", "Acessorestrito"]:
+        if id_usuario in ["Confiautomaster", "Acessorestrito"]:
             c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas ORDER BY data DESC")
         else:
-            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas WHERE id = ? ORDER BY data DESC", (id_atual,))
+            c.execute("SELECT cliente, telefone, veiculo, placa, fipe, mensalidade, desconto, participacao, descTexto, obs, data FROM vendas WHERE id = ? ORDER BY data DESC", (id_usuario,))
         vendas = c.fetchall()
 
     return jsonify([{
@@ -125,7 +123,6 @@ def listar_vendas():
         'obs': v[9],
         'data': v[10]
     } for v in vendas])
-
 
 @app.route('/excluir', methods=['DELETE'])
 def excluir():
