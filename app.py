@@ -153,7 +153,7 @@ def editar():
 
     campos = [
         'cliente', 'telefone', 'veiculo', 'placa', 'fipe',
-        'mensalidade', 'desconto', 'participacao', 'descTexto', 'obs'
+        'mensalidade_original', 'mensalidade_desconto', 'participacao', 'desconto', 'observacoes', 'usuario_id'
     ]
     valores = [data.get(campo) for campo in campos]
 
