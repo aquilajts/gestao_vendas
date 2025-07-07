@@ -81,11 +81,11 @@ def salvar():
         data.get('veiculo'),
         data.get('placa'),
         data.get('fipe'),
-        data.get('mensalidade'),
-        data.get('desconto'),
+        data.get('mensalidade_original'),
+        data.get('mensalidade_desconto'),
         data.get('participacao'),
-        data.get('descTexto'),
-        data.get('obs'),
+        data.get('desconto'),
+        data.get('observacoes'),
         user_id
     )
 
