@@ -57,26 +57,32 @@
         const tr = document.createElement('tr');
         tr.className = 'border-b border-gray-700';
         tr.innerHTML = `
-            <td class='p-2'>${v.data || ""}</td>
-            <td class='p-2 flex items-start flex-col gap-1'>
+          <td class='p-2'>${v.data || ""}</td>
+          <td class='p-2'>
+            <div class='flex items-center gap-2'>
               ${v.cliente || ""}
-              <span class='text-xs text-pink-400'>${v.telefone || ""}</span>
-            </td>
-            <td class='p-2'>${v.veiculo || ""}</td>
-            <td class='p-2'>${v.placa || ""}</td>
-            <td class='p-2'>R$ ${v.fipe || "0,00"}</td>
-            <td class='p-2'>R$ ${v.mensalidade_original || "0,00"}</td>
-            <td class='p-2'>R$ ${v.mensalidade_desconto || "0,00"}</td>
-            <td class='p-2'>R$ ${v.participacao || "0,00"}</td>
-            <td class='p-2'>${v.descTexto || "-"}</td>
-            <td class='p-2'>${v.obs || "-"}</td>
-            <td class='p-2 flex gap-2'>
-              ${isMaster ? '' : `
-                <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
-                <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
-              `}
-            </td>
-          `;
+              <button onclick="copiarVenda(${i})" class='text-blue-400'>📄</button>
+            </div>
+            <div class='text-xs text-pink-400 flex items-center gap-2'>
+              ${v.telefone || ""}
+              <a href='https://wa.me/55${v.telefone}' target='_blank' class='text-green-400'>📞</a>
+            </div>
+          </td>
+          <td class='p-2'>${v.veiculo || ""}</td>
+          <td class='p-2'>${v.placa || ""}</td>
+          <td class='p-2'>R$ ${v.fipe || "0,00"}</td>
+          <td class='p-2'>R$ ${v.mensalidade_original || "0,00"}</td>
+          <td class='p-2'>R$ ${v.mensalidade_desconto || "0,00"}</td>
+          <td class='p-2'>R$ ${v.participacao || "0,00"}</td>
+          <td class='p-2'>${v.descTexto || "-"}</td>
+          <td class='p-2'>${v.obs || "-"}</td>
+          <td class='p-2 flex gap-2'>
+            ${isMaster ? '' : `
+              <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
+              <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
+            `}
+          </td>
+        `;
         tbody.appendChild(tr);
       });
     }
@@ -145,21 +151,20 @@
       <div class="overflow-auto">
         <table class="w-full text-sm text-left">
           <thead>
-            <tr class="bg-gray-800">
-              <th class="p-2">Data</th>
-              <th class="p-2">Cliente</th>
-              <th class="p-2">Telefone</th>
-              <th class="p-2">Veículo</th>
-              <th class="p-2">Placa</th>
-              <th class="p-2">FIPE</th>
-              <th class="p-2">Original</th>
-              <th class="p-2">Com Desconto</th>
-              <th class="p-2">Participação</th>
-              <th class="p-2">Desconto</th>
-              <th class="p-2">Observações</th>
-              <th class="p-2">Ações</th>
-            </tr>
-          </thead>
+              <tr class="bg-gray-800">
+                <th class="p-2">Data</th>
+                <th class="p-2">Cliente</th>
+                <th class="p-2">Veículo</th>
+                <th class="p-2">Placa</th>
+                <th class="p-2">FIPE</th>
+                <th class="p-2">Original</th>
+                <th class="p-2">Com Desconto</th>
+                <th class="p-2">Participação</th>
+                <th class="p-2">Desconto</th>
+                <th class="p-2">Observações</th>
+                <th class="p-2">Ações</th>
+              </tr>
+            </thead>
           <tbody id="historico-body"></tbody>
         </table>
       </div>
