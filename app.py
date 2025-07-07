@@ -84,8 +84,8 @@ def salvar():
         data.get('mensalidade_original'),
         data.get('mensalidade_desconto'),
         data.get('participacao'),
-        data.get('descTexto'),
-        data.get('obs'),
+        data.get('desconto'),
+        data.get('observacoes'),
         user_id
     )
 
@@ -94,7 +94,7 @@ def salvar():
     cur.execute("""
         INSERT INTO vendas (data, cliente, telefone, veiculo, placa, fipe,
                             mensalidade_original, mensalidade_desconto,
-                            participacao, descTexto, obs, usuario_id)
+                            participacao, desconto, observacoes, usuario_id)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, venda)
     conn.commit()
@@ -154,7 +154,7 @@ def editar():
     campos = [
         'cliente', 'telefone', 'veiculo', 'placa', 'fipe',
         'mensalidade_original', 'mensalidade_desconto',
-        'participacao', 'descTexto', 'obs', 'usuario_id'
+        'participacao', 'desconto', 'observacoes', 'usuario_id'
     ]
     valores = [data.get(campo) for campo in campos]
 
