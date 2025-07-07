@@ -72,7 +72,8 @@ def salvar():
     if user_id in MASTER_IDS:
         return 'Contas Master não podem cadastrar vendas', 403
 
-    data = request.form
+    data = request.get_json()
+    
     venda = (
         datetime.now().strftime('%d/%m/%Y %H:%M'),
         data.get('cliente'),
