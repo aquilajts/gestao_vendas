@@ -153,7 +153,8 @@ def editar():
 
     campos = [
         'cliente', 'telefone', 'veiculo', 'placa', 'fipe',
-        'mensalidade_original', 'mensalidade_desconto', 'participacao', 'descTexto', 'obs', 'usuario_id'
+        'mensalidade_original', 'mensalidade_desconto',
+        'participacao', 'descTexto', 'obs', 'usuario_id'
     ]
     valores = [data.get(campo) for campo in campos]
 
@@ -163,7 +164,7 @@ def editar():
         UPDATE vendas SET
             cliente = ?, telefone = ?, veiculo = ?, placa = ?, fipe = ?,
             mensalidade_original = ?, mensalidade_desconto = ?,
-            participacao = ?, descTexto = ?, obs = ?
+            participacao = ?, desconto = ?, observacoes = ?
         WHERE id = ?
     """, valores + [venda_id])
 
