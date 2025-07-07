@@ -57,30 +57,26 @@
         const tr = document.createElement('tr');
         tr.className = 'border-b border-gray-700';
         tr.innerHTML = `
-          <td class='p-2'>${v.data}</td>
-          <td class='p-2 flex items-center gap-2'>
-            ${v.cliente}
-            <button onclick="copiarVenda(${i})" class='text-blue-400'>📄</button>
-          </td>
-          <td class='p-2 flex items-center gap-2'>
-            ${v.telefone}
-            <a href='https://wa.me/55${v.telefone}' target='_blank' class='text-green-400'>📞</a>
-          </td>
-          <td class='p-2'>${v.veiculo}</td>
-          <td class='p-2'>${v.placa}</td>
-          <td class='p-2'>R$ ${v.fipe}</td>
-          <td class='p-2'>R$ ${v.mensalidade_original}</td>
-          <td class='p-2'>R$ ${v.mensalidade_desconto}</td>
-          <td class='p-2'>R$ ${v.participacao}</td>
-          <td class='p-2'>${v.descTexto}</td>
-          <td class='p-2'>${v.obs}</td>
-          <td class='p-2 flex gap-2'>
-            ${isMaster ? '' : `
-              <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
-              <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
-            `}
-          </td>
-        `;
+            <td class='p-2'>${v.data || ""}</td>
+            <td class='p-2 flex items-start flex-col gap-1'>
+              ${v.cliente || ""}
+              <span class='text-xs text-pink-400'>${v.telefone || ""}</span>
+            </td>
+            <td class='p-2'>${v.veiculo || ""}</td>
+            <td class='p-2'>${v.placa || ""}</td>
+            <td class='p-2'>R$ ${v.fipe || "0,00"}</td>
+            <td class='p-2'>R$ ${v.mensalidade_original || "0,00"}</td>
+            <td class='p-2'>R$ ${v.mensalidade_desconto || "0,00"}</td>
+            <td class='p-2'>R$ ${v.participacao || "0,00"}</td>
+            <td class='p-2'>${v.descTexto || "-"}</td>
+            <td class='p-2'>${v.obs || "-"}</td>
+            <td class='p-2 flex gap-2'>
+              ${isMaster ? '' : `
+                <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
+                <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
+              `}
+            </td>
+          `;
         tbody.appendChild(tr);
       });
     }
