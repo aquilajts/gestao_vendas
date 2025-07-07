@@ -25,26 +25,38 @@
 
     async function salvarVenda() {
       const form = document.getElementById('form');
-      const formData = new FormData(form);
-      const telefone = formData.get("telefone");
-      const cliente = formData.get("cliente");
-
-      const response = await fetch('/vendas');
-      const vendas = await response.json();
-
-      const duplicada = vendas.find(v => v.telefone === telefone);
+    
+      const venda = {
+        cliente: form.cliente.value,
+        telefone: form.telefone.value,
+        veiculo: form.veiculo.value,
+        placa: form.placa.value,
+        fipe: form.fipe.value,
+        mensalidade_original: form.mensalidade_original.value,
+        mensalidade_desconto: form.mensalidade_desconto.value,
+        participacao: form.participacao.value,
+        descTexto: form.descTexto.value,
+        obs: form.obs.value
+      };
+    
+      const duplicada = dadosGlobais.find(v => v.telefone === venda.telefone);
       if (duplicada) {
         const confirma = confirm(`Esse número já está cadastrado no Cliente \"${duplicada.cliente}\" Placa \"${duplicada.placa}\". Deseja substituir?`);
         if (!confirma) return;
       }
-
+    
       await fetch('/salvar', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(venda)
       });
+    
       form.reset();
       verificarTipo();
     }
+
 
     async function atualizarHistorico(isMaster) {
       const response = await fetch('/vendas');
