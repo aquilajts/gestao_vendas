@@ -9,18 +9,41 @@
   <script>
     let dadosGlobais = [];
     let idUsuario = "";
+    let senhaUsuario = "";
+    let perfilUsuario = "";
 
     async function verificarTipo() {
       const res = await fetch('/id');
-      const { id, isMaster } = await res.json();
+      const { id, senha, perfil } = await res.json();
       idUsuario = id;
-      document.getElementById('id-logado').innerText = "ID: " + id;
+      senhaUsuario = senha;
+      perfilUsuario = perfil;
 
-      if (isMaster) {
+      document.getElementById('id-logado').innerHTML = `ID: ${id} - SENHA: ${senha} <button onclick="alterarSenha()" class="text-yellow-400">✏️</button>`;
+
+      if (senha === "00000") {
+        alert("⚠️ Sua senha é a padrão (00000). Por favor, altere-a.");
+      }
+
+      if (perfil === "supervisor") {
         document.getElementById('formulario-nova-venda').style.display = 'none';
       }
 
-      atualizarHistorico(isMaster);
+      atualizarHistorico(perfil);
+    }
+
+    async function alterarSenha() {
+      const novaSenha = prompt("Digite uma nova senha (somente 5 números):");
+      if (!novaSenha || novaSenha.length !== 5 || !/^[0-9]+$/.test(novaSenha)) {
+        alert("Senha inválida. A senha deve conter exatamente 5 números.");
+        return;
+      }
+      await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idUsuario, senha: novaSenha })
+      });
+      location.reload();
     }
 
     async function salvarVenda() {
@@ -36,26 +59,18 @@
         descTexto: document.getElementById("descTexto").value,
         obs: document.getElementById("obs").value
       };
-  
-      const duplicada = dadosGlobais.find(v => v.telefone === venda.telefone);
-      if (duplicada) {
-        const confirma = confirm(`Esse número já está cadastrado no Cliente \"${duplicada.cliente}\" Placa \"${duplicada.placa}\". Deseja substituir?`);
-        if (!confirma) return;
-      }
-  
+
       await fetch('/salvar', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(venda)
       });
-  
+
       document.getElementById("form").reset();
       verificarTipo();
     }
 
-    async function atualizarHistorico(isMaster) {
+    async function atualizarHistorico(perfil) {
       const response = await fetch('/vendas');
       const data = await response.json();
       dadosGlobais = data;
@@ -86,15 +101,20 @@
           <td class='p-2'>${v.descTexto || "-"}</td>
           <td class='p-2'>${v.obs || "-"}</td>
           <td class='p-2'>
-            ${isMaster 
-              ? `<span class="text-xs text-gray-400">${v.usuario_id}</span>` 
-              : `
-                <div class="flex gap-2">
-                  <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
-                  <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
-                </div>
-              `
-            }
+            ${perfil === 'gerente' ? `
+              <div class="text-xs text-gray-400">
+                ID: ${v.usuario_id}<br>SENHA: *****<br>
+                <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
+                <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
+              </div>
+            ` : perfil === 'supervisor' ? `
+              <span class="text-xs text-gray-400">ID: ${v.usuario_id}</span>
+            ` : `
+              <div class="flex gap-2">
+                <button onclick="preencherFormulario(${i})" class='text-yellow-400'>✏️</button>
+                <button onclick="excluirVenda(${i})" class='text-red-500'>❌</button>
+              </div>
+            `}
           </td>
         `;
         tbody.appendChild(tr);
@@ -104,17 +124,16 @@
     function copiarVenda(i) {
       const v = dadosGlobais[i];
       const texto = `*DATA*: ${v.data}
-    *NOME*: ${v.cliente}
-    *TEL*: ${v.telefone}
-    *VEIC*: ${v.veiculo}
-    *PLACA*: ${v.placa}
-    *FIPE*: R$ ${v.fipe}
-    *Men. De*: R$ ${v.mensalidade_original}
-    *Men. por*: R$ ${v.mensalidade_desconto}
-    *PARTICIPAÇÃO*: R$ ${v.participacao}
-    *DESCONTOS*: ${v.descTexto}
-    *OBS*: ${v.obs}`;
-    
+*NOME*: ${v.cliente}
+*TEL*: ${v.telefone}
+*VEIC*: ${v.veiculo}
+*PLACA*: ${v.placa}
+*FIPE*: R$ ${v.fipe}
+*Men. De*: R$ ${v.mensalidade_original}
+*Men. por*: R$ ${v.mensalidade_desconto}
+*PARTICIPAÇÃO*: R$ ${v.participacao}
+*DESCONTOS*: ${v.descTexto}
+*OBS*: ${v.obs}`;
       navigator.clipboard.writeText(texto);
       alert('Informações copiadas!');
     }
@@ -146,9 +165,9 @@
 </head>
 <body class="bg-black text-white font-sans">
   <div class="max-w-5xl mx-auto p-4">
+    <img src="/static/Logo_ConfiAuto_Nova.png" alt="Logo" class="mx-auto mb-4 w-40" />
     <h1 class="text-3xl font-bold mb-2">Gestão de Vendas</h1>
     <p id="id-logado" class="mb-4 text-sm text-gray-400"></p>
-
     <div id="formulario-nova-venda" class="mb-6">
       <h2 class="text-xl mb-2">Nova Venda</h2>
       <form id="form" onsubmit="event.preventDefault(); salvarVenda();" class="space-y-3">
