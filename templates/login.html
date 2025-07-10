@@ -9,32 +9,42 @@
   <script>
     async function realizarLogin(event) {
       event.preventDefault();
-      const id = document.getElementById('id').value;
-      if (id.length < 5 || id.length > 20) {
-        alert("O ID deve ter entre 5 e 20 caracteres.");
+      const id = document.getElementById('id').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+
+      if (id.length < 5 || id.length > 20 || senha.length !== 5 || !/^\d+$/.test(senha)) {
+        alert("ID deve ter entre 5 e 20 caracteres. Senha deve conter exatamente 5 dígitos numéricos.");
         return;
       }
 
       const response = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id, senha })
       });
 
       if (response.ok) {
+        if (senha === '00000') {
+          alert("Senha padrão detectada. Altere sua senha para mais segurança.");
+        }
         window.location.href = "/painel";
       } else {
-        alert("ID inválido.");
+        alert("ID ou senha inválidos.");
       }
     }
   </script>
 </head>
 <body class="bg-black text-white h-screen flex items-center justify-center">
   <div class="w-full max-w-sm bg-gray-900 p-8 rounded-lg shadow-lg">
+    <img src="/static/Logo_ConfiAuto_Nova.png" alt="Logo" class="mx-auto mb-6 w-32">
     <h1 class="text-2xl font-bold mb-6 text-center">Acesso ao Sistema</h1>
     <form onsubmit="realizarLogin(event)">
       <label for="id" class="block mb-2">Digite seu ID:</label>
-      <input id="id" name="id" type="password" minlength="5" maxlength="20" required class="w-full p-2 mb-4 rounded bg-gray-800">
+      <input id="id" name="id" required class="w-full p-2 mb-4 rounded bg-gray-800">
+
+      <label for="senha" class="block mb-2">Senha (padrão 00000):</label>
+      <input id="senha" name="senha" type="password" required maxlength="5" minlength="5" pattern="\d{5}" class="w-full p-2 mb-4 rounded bg-gray-800">
+
       <button type="submit" class="w-full bg-white text-black p-2 rounded">Entrar</button>
     </form>
   </div>
