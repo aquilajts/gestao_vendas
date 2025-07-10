@@ -27,19 +27,39 @@ def realizar_login():
     data = request.get_json()
     user_id = data.get('id')
     senha = data.get('senha')
+
     if not user_id or not senha or len(senha) != 5 or not senha.isdigit():
-        return 'ID ou senha inválido', 400
+        return 'ID ou senha inválidos', 400
 
-    session['usuario_id'] = user_id
-    session['senha'] = senha
+    try:
+        # Consulta o Supabase por esse ID
+        result = supabase.table("usuarios").select("*").eq("id", user_id).execute()
+        usuarios = result.data
 
-    result = supabase.table("usuarios").select("*").eq("id", user_id).execute()
-    if result.data:
-        supabase.table("usuarios").update({"senha": senha}).eq("id", user_id).execute()
-    else:
-        supabase.table("usuarios").insert({"id": user_id, "senha": senha}).execute()
+        if usuarios:
+            # ID já existe: valida a senha
+            if usuarios[0]["senha"] != senha:
+                return 'ID ou senha inválidos', 400
+        else:
+            # ID não existe: cria automaticamente com senha padrão
+            supabase.table("usuarios").insert({
+                "id": user_id,
+                "senha": "00000",
+                "perfil": "usuario"
+            }).execute()
 
-    return '', 200
+            # Se a senha digitada for diferente de "00000", nega o acesso
+            if senha != "00000":
+                return 'ID ou senha inválidos', 400
+
+        # Login válido
+        session['usuario_id'] = user_id
+        session['senha'] = senha
+        return '', 200
+
+    except Exception as e:
+        print("Erro ao processar login:", e)
+        return 'Erro no servidor', 500
 
 @app.route('/id')
 def obter_id():
