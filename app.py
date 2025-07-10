@@ -84,6 +84,22 @@ def painel():
         return redirect('/')
     return render_template_string(HTML)
 
+@app.route('/alterar-senha', methods=['POST'])
+def alterar_senha():
+    if 'usuario_id' not in session:
+        return 'Não autorizado', 403
+
+    data = request.get_json()
+    nova_senha = data.get('nova_senha')
+
+    if not nova_senha or len(nova_senha) != 5 or not nova_senha.isdigit():
+        return 'Senha inválida', 400
+
+    session['senha'] = nova_senha
+    supabase.table("usuarios").update({"senha": nova_senha}).eq("id", session['usuario_id']).execute()
+
+    return '', 200
+
 @app.route('/vendas')
 def listar_vendas():
     if 'usuario_id' not in session:
