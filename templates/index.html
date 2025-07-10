@@ -38,12 +38,19 @@
         alert("Senha inválida. A senha deve conter exatamente 5 números.");
         return;
       }
-      await fetch('/login', {
+    
+      const res = await fetch('/alterar-senha', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: idUsuario, senha: novaSenha })
+        body: JSON.stringify({ nova_senha: novaSenha })
       });
-      location.reload();
+    
+      if (res.ok) {
+        alert('Senha alterada com sucesso!');
+        location.reload();
+      } else {
+        alert('Erro ao alterar a senha.');
+      }
     }
 
     async function salvarVenda() {
