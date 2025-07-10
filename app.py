@@ -8,46 +8,61 @@ app = Flask(__name__)
 CORS(app)
 app.secret_key = 'sua_chave_super_secreta'
 
-# Pegando chaves do ambiente (Render)
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 MASTER_IDS = ['Confiadmin', 'Acessorestrito']
+GERENTE_ID = 'Acessorestrito'
+SUPERVISOR_ID = 'Confiadmin'
 HTML = open("templates/index.html", encoding="utf-8").read()
-
+LOGIN_HTML = open("templates/login.html", encoding="utf-8").read()
 
 @app.route('/')
 def login():
-    return render_template_string(open("templates/login.html", encoding="utf-8").read())
-
+    return render_template_string(LOGIN_HTML)
 
 @app.route('/login', methods=['POST'])
 def realizar_login():
     data = request.get_json()
     user_id = data.get('id')
-    if user_id and 5 <= len(user_id) <= 20:
-        session['usuario_id'] = user_id
-        return '', 200
-    return 'ID inválido', 400
+    senha = data.get('senha')
+    if not user_id or not senha or len(senha) != 5 or not senha.isdigit():
+        return 'ID ou senha inválido', 400
 
+    session['usuario_id'] = user_id
+    session['senha'] = senha
+
+    result = supabase.table("usuarios").select("*").eq("id", user_id).execute()
+    if result.data:
+        supabase.table("usuarios").update({"senha": senha}).eq("id", user_id).execute()
+    else:
+        supabase.table("usuarios").insert({"id": user_id, "senha": senha}).execute()
+
+    return '', 200
 
 @app.route('/id')
 def obter_id():
     if 'usuario_id' not in session:
-        return jsonify({'id': None, 'isMaster': False})
+        return jsonify({'id': None, 'senha': None, 'perfil': 'usuario'})
+
+    perfil = 'usuario'
+    if session['usuario_id'] == GERENTE_ID:
+        perfil = 'gerente'
+    elif session['usuario_id'] == SUPERVISOR_ID:
+        perfil = 'supervisor'
+
     return jsonify({
         'id': session['usuario_id'],
-        'isMaster': session['usuario_id'] in MASTER_IDS
+        'senha': session['senha'],
+        'perfil': perfil
     })
-
 
 @app.route('/painel')
 def painel():
     if 'usuario_id' not in session:
         return redirect('/')
     return render_template_string(HTML)
-
 
 @app.route('/vendas')
 def listar_vendas():
@@ -62,14 +77,14 @@ def listar_vendas():
 
     return jsonify(res.data)
 
-
 @app.route('/salvar', methods=['POST'])
 def salvar():
     if 'usuario_id' not in session:
         return 'Não autorizado', 403
+
     user_id = session['usuario_id']
-    if user_id in MASTER_IDS:
-        return 'Contas Master não podem cadastrar vendas', 403
+    if user_id == SUPERVISOR_ID:
+        return 'Supervisores não podem cadastrar vendas', 403
 
     data = request.get_json()
 
@@ -90,17 +105,16 @@ def salvar():
 
     try:
         supabase.table("vendas").insert(venda).execute()
-        return '', 200
     except Exception as e:
         print("Erro ao salvar venda:", e)
         return 'Erro ao salvar', 500
 
+    return '', 200
+
 @app.route('/excluir', methods=['DELETE'])
 def excluir():
-    if 'usuario_id' not in session:
+    if 'usuario_id' not in session or session['usuario_id'] != GERENTE_ID:
         return 'Não autorizado', 403
-    if session['usuario_id'] in MASTER_IDS:
-        return 'Contas Master não podem excluir', 403
 
     placa = request.args.get("placa")
     data = request.args.get("data")
@@ -108,13 +122,10 @@ def excluir():
     supabase.table("vendas").delete().match({"placa": placa, "data": data}).execute()
     return '', 200
 
-
 @app.route('/editar', methods=['POST'])
 def editar():
-    if 'usuario_id' not in session:
+    if 'usuario_id' not in session or session['usuario_id'] != GERENTE_ID:
         return 'Não autorizado', 403
-    if session['usuario_id'] in MASTER_IDS:
-        return 'Contas Master não podem editar', 403
 
     data = request.get_json()
     venda_id = data.get('id')
