@@ -25,7 +25,11 @@ def home():
 @app.route('/cliente')
 def cliente():
     return render_template("cliente.html")
-
+    
+@app.route('/simulacao')
+def simulacao():
+    return render_template("simulacao.html")
+    
 @app.route('/login', methods=['GET'])
 def login_page():
     return render_template("login.html")
