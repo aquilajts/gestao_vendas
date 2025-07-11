@@ -198,6 +198,34 @@ def editar():
     supabase.table("vendas").update(campos).eq("id", venda_id).execute()
     return '', 200
 
+@app.route('/intervalos')
+def obter_intervalos():
+    try:
+        dados = supabase.table("tabela").select("fipe").execute().data
+        return jsonify(sorted(dados, key=lambda x: x["fipe"]))
+    except Exception as e:
+        print("Erro ao buscar intervalos:", e)
+        return jsonify([])
+
+@app.route('/valor')
+def buscar_valor():
+    try:
+        nome_tabela = request.args.get('tabela')  # 'tabela' ou 'tabelade'
+        fipe = float(request.args.get('fipe'))
+        coluna = request.args.get('coluna')
+
+        dados = supabase.table(nome_tabela).select("*").eq("fipe", fipe).execute().data
+        if not dados:
+            return jsonify({"valor": "não encontrado"})
+
+        valor = dados[0].get(coluna)
+        valor_formatado = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+        return jsonify({"valor": valor_formatado})
+    except Exception as e:
+        print("Erro ao buscar valor:", e)
+        return jsonify({"valor": "erro"})
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
