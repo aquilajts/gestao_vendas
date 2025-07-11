@@ -22,6 +22,10 @@ LOGIN_HTML = open("templates/login.html", encoding="utf-8").read()
 def home():
     return render_template("home.html")
 
+@app.route('/cliente')
+def cliente():
+    return render_template("cliente.html")
+
 @app.route('/login', methods=['GET'])
 def login_page():
     return render_template("login.html")
