@@ -18,9 +18,9 @@ SUPERVISOR_ID = 'Confiadmin'
 HTML = open("templates/index.html", encoding="utf-8").read()
 LOGIN_HTML = open("templates/login.html", encoding="utf-8").read()
 
-@app.route('/')
-def login():
-    return render_template_string(LOGIN_HTML)
+@app.route('/home')
+def tela_apresentacao():
+    return render_template("home.html")
 
 @app.route('/login', methods=['POST'])
 def realizar_login():
