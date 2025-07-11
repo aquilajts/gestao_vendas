@@ -10,27 +10,30 @@
 <body class="bg-black text-white font-sans flex flex-col min-h-screen justify-between">
   <div class="flex flex-col items-center justify-center flex-grow mt-10">
     <img src="/static/Logo_ConfiAuto_Nova.png" alt="Logo" class="w-32 mb-6">
-  <!-- Botão Voltar -->
-  <a href="javascript:history.back()" class="text-sm text-blue-400 hover:text-blue-200 self-start ml-4 -mb-4 flex items-center gap-1">
-    ← Voltar
-  </a>
+
+    <!-- Botão Voltar -->
+    <a href="javascript:history.back()" class="text-sm text-blue-400 hover:text-blue-200 self-start ml-4 -mb-4 flex items-center gap-1">
+      ← Voltar
+    </a>
 
     <h1 class="text-xl font-bold mb-4">Simulação de Proteção Veicular</h1>
 
     <form id="simulacaoForm" class="w-80 space-y-4">
       <select id="categoria" required class="w-full p-2 bg-gray-800 rounded">
         <option value="" disabled selected>Selecione a categoria</option>
-        <option>Moto</option>
-        <option>Carro de passeio ou trabalho</option>
-        <option>Carro de app ou taxi</option>
-        <option>Caminhonete</option>
-        <option>Caminhão</option>
-        <option>Especial</option>
+        <option value="MOTO">Moto</option>
+        <option value="CARRO">Carro de passeio ou trabalho</option>
+        <option value="APP">Carro de app ou taxi</option>
+        <option value="CAMINHONETE">Caminhonete</option>
+        <option value="CAMINHÃO">Caminhão</option>
+        <option value="ESPECIAL">Especial</option>
       </select>
       <input type="text" id="fipe" placeholder="Valor tabela FIPE R$" class="w-full p-2 bg-gray-800 rounded" required oninput="formatarMoeda(this)">
       <button type="submit" class="w-full bg-white text-black py-2 rounded font-semibold">Realizar simulação</button>
       <p class="text-xs text-center text-gray-400 mt-2">*Os valores precisam ser confirmados por um de nossos consultores, tais como eventuais descontos e promoções NÃO citados!*</p>
     </form>
+
+    <div id="resultado" class="mt-6 text-center"></div>
   </div>
 
   <footer class="text-center text-sm text-gray-300 mb-4">
@@ -44,11 +47,61 @@
       input.value = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    document.getElementById("simulacaoForm").addEventListener("submit", function(e) {
+    async function buscarValor(fipeStr, categoria) {
+      const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.'));
+
+      const resposta = await fetch('/intervalos');
+      const intervalos = await resposta.json();
+
+      let valorBase = null;
+      for (let i = 0; i < intervalos.length; i++) {
+        const faixa = intervalos[i];
+        if (fipeLimpo >= faixa.fipe && fipeLimpo < faixa.fipe + 3000) {
+          valorBase = faixa.fipe;
+          break;
+        }
+      }
+
+      if (!valorBase) return { erro: 'Valor FIPE fora da faixa atendida.' };
+
+      const tabelaDesconto = await fetch(`/valor?tabela=tabela&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
+      const tabelaSemDesconto = await fetch(`/valor?tabela=tabelade&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
+
+      return {
+        comDesconto: tabelaDesconto.valor,
+        semDesconto: tabelaSemDesconto.valor
+      };
+    }
+
+    document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const categoria = document.getElementById("categoria").value;
       const fipe = document.getElementById("fipe").value;
-      alert(`Categoria: ${categoria}\nValor FIPE: R$ ${fipe}\n\n(Em breve esta função estará conectada ao Supabase)`);
+
+      const resultadoDiv = document.getElementById("resultado");
+      resultadoDiv.innerHTML = "<p class='text-gray-400'>Buscando informações...</p>";
+
+      const resultado = await buscarValor(fipe, categoria);
+
+      if (resultado.erro) {
+        resultadoDiv.innerHTML = `<p class='text-red-400'>${resultado.erro}</p>`;
+      } else {
+        resultadoDiv.innerHTML = `
+          <p class='text-green-400'>✅ Simulação concluída!</p>
+          <p>💰 Mensalidade original: <span class='font-bold'>R$ ${resultado.semDesconto}</span></p>
+          <p>🎯 Com desconto: <span class='font-bold text-yellow-400'>R$ ${resultado.comDesconto}</span></p>
+          <div class='mt-4'>
+            <label class='flex items-center gap-2'>
+              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500'>
+              Desejo instalar rastreador no meu veículo por mais R$ 30,00 mensais
+            </label>
+            <div class='mt-4 flex flex-col gap-2'>
+              <button class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
+              <button class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
+            </div>
+          </div>
+        `;
+      }
     });
   </script>
 </body>
