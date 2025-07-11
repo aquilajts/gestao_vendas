@@ -29,6 +29,10 @@ def cliente():
 @app.route('/simulacao')
 def simulacao():
     return render_template("simulacao.html")
+
+@app.route('/coberturas')
+def coberturas():
+    return render_template("coberturas.html")
     
 @app.route('/login', methods=['GET'])
 def login_page():
