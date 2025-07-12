@@ -199,10 +199,10 @@ def editar():
     return '', 200
 
 @app.route('/intervalos')
-def obter_intervalos():
+def intervalos():
     try:
-        dados = supabase.table("tabela").select("fipe").execute().data
-        return jsonify(sorted(dados, key=lambda x: x["fipe"]))
+        dados = supabase.table("tabela").select("FIPE").execute()
+        return jsonify([{"fipe": float(row["FIPE"])} for row in dados.data])
     except Exception as e:
         print("Erro ao buscar intervalos:", e)
         return jsonify([])
@@ -210,21 +210,26 @@ def obter_intervalos():
 @app.route('/valor')
 def buscar_valor():
     try:
-        nome_tabela = request.args.get('tabela')  # 'tabela' ou 'tabelade'
+        nome_tabela = request.args.get('tabela')     # 'tabela' ou 'tabelade'
         fipe = float(request.args.get('fipe'))
-        coluna = request.args.get('coluna')
+        coluna = request.args.get('coluna')          # MOTO, CARRO, etc
 
-        dados = supabase.table(nome_tabela).select("*").eq("fipe", fipe).execute().data
-        if not dados:
-            return jsonify({"valor": "não encontrado"})
+        if not nome_tabela or not fipe or not coluna:
+            return jsonify({'erro': 'Parâmetros ausentes'}), 400
 
-        valor = dados[0].get(coluna)
-        valor_formatado = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        resultado = supabase.table(nome_tabela).select(coluna).eq("FIPE", fipe).execute()
 
-        return jsonify({"valor": valor_formatado})
+        if resultado.data:
+            valor = resultado.data[0][coluna]
+            valor_formatado = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            return jsonify({"valor": valor_formatado})
+        else:
+            return jsonify({'erro': 'Valor não encontrado'}), 404
+
     except Exception as e:
         print("Erro ao buscar valor:", e)
-        return jsonify({"valor": "erro"})
+        return jsonify({'erro': 'Erro interno'}), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
