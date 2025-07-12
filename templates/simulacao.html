@@ -47,7 +47,7 @@
     }
 
     async function buscarValor(fipeStr, categoria) {
-      const fipeLimpo = Math.floor(parseFloat(fipeStr.replace(/\./g, '').replace(',', '.')));
+      const fipeLimpo = parseInt(fipeStr.replace(/\./g, '').replace(',', '')); // REMOVE CENTAVOS
       console.log("FIPE digitada:", fipeLimpo);
     
       const resposta = await fetch('/intervalos');
