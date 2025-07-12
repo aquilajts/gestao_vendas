@@ -57,10 +57,10 @@
       let valorBase = null;
       for (let i = 0; i < intervalos.length; i++) {
         const faixa = intervalos[i];
-        const inicio = Number(faixa.fipe);
-        const fim = inicio + 3000;
+        const inicio = Math.floor(parseFloat(faixa.fipe)); // Garante número limpo
+        const fim = inicio + 2999; // Faixa mais precisa até o limite
     
-        if (fipeLimpo >= inicio && fipeLimpo < fim) {
+        if (fipeLimpo >= inicio && fipeLimpo <= fim) {
           valorBase = inicio;
           break;
         }
