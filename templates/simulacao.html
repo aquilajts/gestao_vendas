@@ -52,15 +52,13 @@
     
       const resposta = await fetch('/intervalos');
       const intervalos = await resposta.json();
-    
+
       let valorBase = null;
       for (let i = 0; i < intervalos.length; i++) {
-        const faixa = intervalos[i];
-        const inicio = Math.floor(parseFloat(faixa.fipe));
-        const fim = inicio + 2999.99;
-    
-        if (fipeLimpo >= inicio && fipeLimpo <= fim) {
-          valorBase = inicio;
+        const faixa = parseFloat(intervalos[i].fipe);
+        if (faixa <= fipeLimpo) {
+          valorBase = faixa;
+        } else {
           break;
         }
       }
