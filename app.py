@@ -201,7 +201,7 @@ def editar():
 @app.route('/intervalos')
 def intervalos():
     try:
-        dados = supabase.table("tabela").select("FIPE").execute()
+        dados = supabase.table("tabela").select("FIPE").order("FIPE", desc=False).execute()
         return jsonify([{"fipe": float(row["FIPE"])} for row in dados.data])
     except Exception as e:
         print("Erro ao buscar intervalos:", e)
