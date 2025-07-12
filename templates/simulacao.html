@@ -48,31 +48,35 @@
     }
 
     async function buscarValor(fipeStr, categoria) {
-      const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.'));
-
+      const fipeLimpo = Math.floor(parseFloat(fipeStr.replace(/\./g, '').replace(',', '.')));
+      console.log("FIPE digitada:", fipeLimpo);
+    
       const resposta = await fetch('/intervalos');
       const intervalos = await resposta.json();
-
+    
       let valorBase = null;
       for (let i = 0; i < intervalos.length; i++) {
         const faixa = intervalos[i];
-        if (fipeLimpo >= faixa.fipe && fipeLimpo < faixa.fipe + 3000) {
-          valorBase = faixa.fipe;
+        const inicio = Number(faixa.fipe);
+        const fim = inicio + 3000;
+    
+        if (fipeLimpo >= inicio && fipeLimpo < fim) {
+          valorBase = inicio;
           break;
         }
       }
-
+    
       if (!valorBase) return { erro: 'Valor FIPE fora da faixa atendida.' };
-
+    
       const tabelaDesconto = await fetch(`/valor?tabela=tabela&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
       const tabelaSemDesconto = await fetch(`/valor?tabela=tabelade&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
-
+    
       return {
         comDesconto: tabelaDesconto.valor,
         semDesconto: tabelaSemDesconto.valor
       };
     }
-
+    
     document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const categoria = document.getElementById("categoria").value;
