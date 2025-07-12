@@ -19,12 +19,13 @@
     <h1 class="text-xl font-bold mb-4">Simulação de Proteção Veicular</h1>
 
     <form id="simulacaoForm" class="w-80 space-y-4">
-      <select id="categoria" required class="w-full p-2 bg-gray-800 rounded"><option value="" disabled selected>Selecione a categoria</option>
+      <select id="categoria" required class="w-full p-2 bg-gray-800 rounded">
+        <option value="" disabled selected>Selecione a categoria</option>
         <option value="MOTO">Moto</option>
         <option value="CARRO">Carro de passeio ou trabalho</option>
         <option value="APP">Carro de app ou taxi</option>
         <option value="CAMINHONETE">Caminhonete</option>
-        <option value="CAMINHAO">Caminhão</option> <!-- SEM acento -->
+        <option value="CAMINHAO">Caminhão</option>
         <option value="ESPECIAL">Especial</option>
       </select>
       <input type="text" id="fipe" placeholder="Valor tabela FIPE R$" class="w-full p-2 bg-gray-800 rounded" required oninput="formatarMoeda(this)">
@@ -47,33 +48,35 @@
     }
 
     async function buscarValor(fipeStr, categoria) {
-      const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.')); // Transforma para número com decimais
+      const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.'));
       console.log("FIPE digitada:", fipeLimpo);
-    
+
       const resposta = await fetch('/intervalos');
       const intervalos = await resposta.json();
+
+      // Ordenar intervalos numericamente para garantir correta comparação
+      intervalos.sort((a, b) => parseFloat(a.fipe) - parseFloat(b.fipe));
 
       let valorBase = null;
       for (let i = 0; i < intervalos.length; i++) {
         const faixa = parseFloat(intervalos[i].fipe);
-        if (faixa <= fipeLimpo) {
+        if (fipeLimpo >= faixa && fipeLimpo < faixa + 3000) {
           valorBase = faixa;
-        } else {
           break;
         }
       }
-    
+
       if (!valorBase) return { erro: 'Valor FIPE fora da faixa atendida.' };
-    
+
       const tabelaDesconto = await fetch(`/valor?tabela=tabela&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
       const tabelaSemDesconto = await fetch(`/valor?tabela=tabelade&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
-    
+
       return {
         comDesconto: tabelaDesconto.valor || "não encontrado",
         semDesconto: tabelaSemDesconto.valor || "não encontrado"
       };
     }
-    
+
     document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const categoria = document.getElementById("categoria").value;
