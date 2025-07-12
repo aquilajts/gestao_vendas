@@ -47,7 +47,7 @@
     }
 
     async function buscarValor(fipeStr, categoria) {
-      const fipeLimpo = parseInt(fipeStr.replace(/\./g, '').replace(',', '')); // REMOVE CENTAVOS
+      const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.')); // Transforma para número com decimais
       console.log("FIPE digitada:", fipeLimpo);
     
       const resposta = await fetch('/intervalos');
@@ -56,8 +56,8 @@
       let valorBase = null;
       for (let i = 0; i < intervalos.length; i++) {
         const faixa = intervalos[i];
-        const inicio = Math.floor(parseFloat(faixa.fipe)); // Garante número limpo
-        const fim = inicio + 2999; // Faixa mais precisa até o limite
+        const inicio = Math.floor(parseFloat(faixa.fipe));
+        const fim = inicio + 2999.99;
     
         if (fipeLimpo >= inicio && fipeLimpo <= fim) {
           valorBase = inicio;
