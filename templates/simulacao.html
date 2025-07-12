@@ -50,27 +50,10 @@
     async function buscarValor(fipeStr, categoria) {
       const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.'));
       console.log("FIPE digitada:", fipeLimpo);
-
-      const resposta = await fetch('/intervalos');
-      const intervalos = await resposta.json();
-
-      // Ordenar intervalos numericamente para garantir correta comparação
-      intervalos.sort((a, b) => parseFloat(a.fipe) - parseFloat(b.fipe));
-
-      let valorBase = null;
-      for (let i = 0; i < intervalos.length; i++) {
-        const faixa = parseFloat(intervalos[i].fipe);
-        if (fipeLimpo >= faixa && fipeLimpo < faixa + 3000) {
-          valorBase = faixa;
-          break;
-        }
-      }
-
-      if (!valorBase) return { erro: 'Valor FIPE fora da faixa atendida.' };
-
-      const tabelaDesconto = await fetch(`/buscar-faixa?fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
+    
+      const tabelaDesconto = await fetch(`/buscar-faixa?tabela=tabela&fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
       const tabelaSemDesconto = await fetch(`/buscar-faixa?tabela=tabelade&fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
-
+    
       return {
         comDesconto: tabelaDesconto.valor || "não encontrado",
         semDesconto: tabelaSemDesconto.valor || "não encontrado"
