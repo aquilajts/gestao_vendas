@@ -68,8 +68,8 @@
 
       if (!valorBase) return { erro: 'Valor FIPE fora da faixa atendida.' };
 
-      const tabelaDesconto = await fetch(`/valor?tabela=tabela&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
-      const tabelaSemDesconto = await fetch(`/valor?tabela=tabelade&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
+      const tabelaDesconto = await fetch(`/buscar-faixa?fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
+      const tabelaSemDesconto = await fetch(`/buscar-faixa?tabela=tabelade&fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
 
       return {
         comDesconto: tabelaDesconto.valor || "não encontrado",
