@@ -210,25 +210,21 @@ def intervalos():
 @app.route('/valor')
 def buscar_valor():
     try:
-        nome_tabela = request.args.get('tabela')     # 'tabela' ou 'tabelade'
+        nome_tabela = request.args.get('tabela')  # 'tabela' ou 'tabelade'
         fipe = float(request.args.get('fipe'))
-        coluna = request.args.get('coluna')          # MOTO, CARRO, etc
+        coluna = request.args.get('coluna')
 
-        if not nome_tabela or not fipe or not coluna:
-            return jsonify({'erro': 'Parâmetros ausentes'}), 400
+        dados = supabase.table(nome_tabela).select("*").eq("FIPE", fipe).execute().data
+        if not dados:
+            return jsonify({"valor": "não encontrado"})
 
-        resultado = supabase.table(nome_tabela).select(coluna).eq("FIPE", fipe).execute()
+        valor = dados[0].get(coluna)
+        valor_formatado = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-        if resultado.data:
-            valor = resultado.data[0][coluna]
-            valor_formatado = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-            return jsonify({"valor": valor_formatado})
-        else:
-            return jsonify({'erro': 'Valor não encontrado'}), 404
-
+        return jsonify({"valor": valor_formatado})
     except Exception as e:
         print("Erro ao buscar valor:", e)
-        return jsonify({'erro': 'Erro interno'}), 500
+        return jsonify({"valor": "erro"})
 
 
 if __name__ == '__main__':
