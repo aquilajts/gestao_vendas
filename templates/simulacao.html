@@ -19,13 +19,12 @@
     <h1 class="text-xl font-bold mb-4">Simulação de Proteção Veicular</h1>
 
     <form id="simulacaoForm" class="w-80 space-y-4">
-      <select id="categoria" required class="w-full p-2 bg-gray-800 rounded">
-        <option value="" disabled selected>Selecione a categoria</option>
+      <select id="categoria" required class="w-full p-2 bg-gray-800 rounded"><option value="" disabled selected>Selecione a categoria</option>
         <option value="MOTO">Moto</option>
         <option value="CARRO">Carro de passeio ou trabalho</option>
         <option value="APP">Carro de app ou taxi</option>
         <option value="CAMINHONETE">Caminhonete</option>
-        <option value="CAMINHÃO">Caminhão</option>
+        <option value="CAMINHAO">Caminhão</option> <!-- SEM acento -->
         <option value="ESPECIAL">Especial</option>
       </select>
       <input type="text" id="fipe" placeholder="Valor tabela FIPE R$" class="w-full p-2 bg-gray-800 rounded" required oninput="formatarMoeda(this)">
