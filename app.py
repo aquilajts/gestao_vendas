@@ -201,19 +201,22 @@ def editar():
 @app.route('/buscar-faixa')
 def buscar_faixa():
     try:
+        nome_tabela = request.args.get('tabela')  # 'tabela' ou 'tabelade'
         fipe = float(request.args.get('fipe'))
-        categoria = request.args.get('coluna')
+        coluna = request.args.get('coluna')
 
-        dados = supabase.table("tabela").select("fipe, fipe2, " + categoria).execute().data
-        faixa = next((linha for linha in dados if linha["fipe"] <= fipe <= linha["fipe2"]), None)
+        dados = supabase.table(nome_tabela).select(f"FIPE, FIPE2, {coluna}").execute().data
+
+        faixa = next((linha for linha in dados if linha["FIPE"] <= fipe <= linha["FIPE2"]), None)
 
         if not faixa:
             return jsonify({"valor": "não encontrado"})
 
-        return jsonify({"valor": faixa[categoria]})
+        return jsonify({"valor": faixa[coluna]})
     except Exception as e:
-        print("Erro na faixa:", e)
+        print("Erro na busca por faixa:", e)
         return jsonify({"valor": "erro"})
+
 
 @app.route('/valor')
 def buscar_valor():
