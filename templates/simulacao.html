@@ -71,8 +71,8 @@
       const tabelaSemDesconto = await fetch(`/valor?tabela=tabelade&fipe=${valorBase}&coluna=${categoria}`).then(r => r.json());
     
       return {
-        comDesconto: tabelaDesconto.valor,
-        semDesconto: tabelaSemDesconto.valor
+        comDesconto: tabelaDesconto.valor || "não encontrado",
+        semDesconto: tabelaSemDesconto.valor || "não encontrado"
       };
     }
     
