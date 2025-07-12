@@ -68,23 +68,16 @@
       };
     }
 
-    document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
+document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const categoria = document.getElementById("categoria").value;
       const fipe = document.getElementById("fipe").value;
+
       const resultadoDiv = document.getElementById("resultado");
-    
-      const fipeLimpo = parseFloat(fipe.replace(/\./g, '').replace(',', '.'));
-    
-      if (fipeLimpo < 1000 || fipeLimpo % 1 !== 0) {
-        resultadoDiv.innerHTML = `<p class='text-red-400'>⚠️ Valor mínimo é R$ 1.000,00 e não são aceitos centavos.</p>`;
-        return;
-      }
-    
       resultadoDiv.innerHTML = "<p class='text-gray-400'>Buscando informações...</p>";
-    
+
       const resultado = await buscarValor(fipe, categoria);
-    
+
       if (resultado.erro) {
         resultadoDiv.innerHTML = `<p class='text-red-400'>${resultado.erro}</p>`;
       } else {
@@ -105,3 +98,6 @@
         `;
       }
     });
+  </script>
+</body>
+</html>
