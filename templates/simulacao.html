@@ -48,7 +48,10 @@
     }
 
     async function buscarValor(fipeStr, categoria) {
-      const fipeLimpo = parseInt(fipeStr.replace(/\D/g, ''));
+      const fipeLimpo = parseFloat(
+        fipeStr.replace(/\./g, '').replace(',', '.')
+      );
+
       console.log("FIPE digitada:", fipeLimpo);
     
       const tabelaDesconto = await fetch(`/buscar-faixa?tabela=tabela&fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
