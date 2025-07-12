@@ -198,14 +198,22 @@ def editar():
     supabase.table("vendas").update(campos).eq("id", venda_id).execute()
     return '', 200
 
-@app.route('/intervalos')
-def intervalos():
+@app.route('/buscar-faixa')
+def buscar_faixa():
     try:
-        dados = supabase.table("tabela").select("FIPE").order("FIPE", desc=False).execute()
-        return jsonify([{"fipe": float(row["FIPE"])} for row in dados.data])
+        fipe = float(request.args.get('fipe'))
+        categoria = request.args.get('coluna')
+
+        dados = supabase.table("tabela").select("fipe, fipe2, " + categoria).execute().data
+        faixa = next((linha for linha in dados if linha["fipe"] <= fipe <= linha["fipe2"]), None)
+
+        if not faixa:
+            return jsonify({"valor": "não encontrado"})
+
+        return jsonify({"valor": faixa[categoria]})
     except Exception as e:
-        print("Erro ao buscar intervalos:", e)
-        return jsonify([])
+        print("Erro na faixa:", e)
+        return jsonify({"valor": "erro"})
 
 @app.route('/valor')
 def buscar_valor():
