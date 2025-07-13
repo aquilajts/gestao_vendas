@@ -100,14 +100,14 @@
               <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
             </label>
             <div class='mt-4 flex flex-col gap-2'>
-              <button onclick='irParaContratacao("basico")' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
-              <button onclick='irParaContratacao("personalizado")' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
+              <button type='button' onclick='salvarESeguir(true)' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
+              <button type='button' onclick='salvarESeguir(false)' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
             </div>
           </div>
         `;
       }
     });
-
+    
     function planoBasico() {
       const rastreador = document.getElementById('rastreador').checked;
       const adesivo = document.getElementById('adesivo').checked;
@@ -127,6 +127,18 @@
       alert(`Plano básico selecionado.\nExtras: R$ ${totalExtras.toFixed(2)}\nBenefícios: ${beneficios.join(", ")}`);
     }
 
+    function salvarESeguir(planoBasico) {
+      const rastreador = document.getElementById("rastreador").checked;
+      const adesivo = document.getElementById("adesivo").checked;
+    
+      localStorage.setItem("mensalidade_original", resultado.semDesconto);
+      localStorage.setItem("mensalidade_com_desconto", resultado.comDesconto);
+      localStorage.setItem("rastreador_checkbox", rastreador);
+      localStorage.setItem("adesivo_checkbox", adesivo);
+      localStorage.setItem("plano_basico", planoBasico);
+    
+      window.location.href = "/contratacao";
+    }    
     function planoPersonalizado() {
       alert("Funcionalidade de plano personalizado em construção...");
     }
