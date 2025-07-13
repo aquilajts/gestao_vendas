@@ -127,8 +127,8 @@
     }
 
     function finalizarPlano() {
-      const seguroBase = 300; // valor simulado estático, pode vir da API
-      const comDesconto = 270; // idem
+      const seguroBase = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
+      const comDesconto = parseFloat(localStorage.getItem(mensalidade_com_desconto)-(mensalidade_original)) || 0;
 
       let adicionais = 0;
       ['guincho', 'terceiros', 'rastreador', 'vflr', 'incendio', 'bau'].forEach(nome => {
@@ -181,6 +181,26 @@
       document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
       document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
     };
+    // Limita seleção de benefícios se adesivo estiver marcado
+    document.getElementById('adesivo').addEventListener('change', function () {
+      const ativo = this.checked;
+      const opcoes = document.querySelectorAll('input[name="beneficio"]');
+      opcoes.forEach(opt => {
+        opt.disabled = !ativo;
+        opt.checked = false;
+      });
+    });
+    
+    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
+        if (selecionados.length > 2) {
+          checkbox.checked = false;
+          alert("Você pode escolher apenas 2 benefícios.");
+        }
+      });
+    });
+
   </script>
 </body>
 </html>
