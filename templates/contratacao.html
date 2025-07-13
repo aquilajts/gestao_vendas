@@ -90,7 +90,7 @@
           <input type="checkbox" name="beneficio" value="-20"> Desconto mensal de R$ 20,00
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="0"> VFLR incluso gratuitamente
+          <input type="checkbox" name="beneficio" value="-20"> VFLR incluso gratuitamente
         </label>
         <label class="bg-white text-black rounded p-4 block">
           <input type="checkbox" name="beneficio" value="0"> R$1.000,00 de desconto na participação
@@ -98,7 +98,7 @@
       </div>
 
       <div class="mt-6 text-right">
-        <button onclick="voltarEtapa2()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
+        <button onclick="irParaEtapa2()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
         <button onclick="finalizarPlano()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
       </div>
 
@@ -120,11 +120,6 @@
     function voltarEtapa1() {
       document.getElementById('etapa2').classList.add('hidden');
       document.getElementById('etapa1').classList.remove('hidden');
-    }
-    
-    function voltarEtapa2() {
-      document.getElementById('etapa3').classList.add('hidden');
-      document.getElementById('etapa2').classList.add('hidden');
     }
     
     function irParaEtapa3() {
