@@ -237,6 +237,9 @@ def buscar_valor():
         print("Erro ao buscar valor:", e)
         return jsonify({"valor": "erro"})
 
+@app.route('/contratacao')
+def contratacao():
+    return render_template("contratacao.html")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
