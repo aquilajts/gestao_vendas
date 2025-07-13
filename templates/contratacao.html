@@ -149,6 +149,38 @@
       document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${desconto.toFixed(2)}</span>`;
       document.getElementById('subtotalAdicionais').innerHTML = `Adicionais: <span class='${adicionais > 0 ? 'text-red-400' : 'text-white'} font-bold'>R$ ${adicionais.toFixed(2)}</span>`;
     }
+    window.onload = () => {
+      const original = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
+      const desconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+      const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
+      const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
+      const planoBasico = localStorage.getItem("plano_basico") === "true";
+    
+      // Pré-seleciona rastreador
+      if (rastreadorMarcado) {
+        document.querySelector('input[name="rastreador"][value="30"]').checked = true;
+      } else {
+        document.querySelector('input[name="rastreador"][value="0"]').checked = true;
+      }
+    
+      // Pré-seleciona adesivo
+      document.getElementById('adesivo').checked = adesivoMarcado;
+    
+      // Se for plano básico, marcar automaticamente os serviços gratuitos
+      if (planoBasico) {
+        document.querySelector('input[name="guincho"][value="0"]').checked = true;
+        document.querySelector('input[name="terceiros"][value="0"]').checked = true;
+        document.querySelector('input[name="vflr"][value="0"]').checked = true;
+        document.querySelector('input[name="incendio"][value="0"]').checked = true;
+        document.querySelector('input[name="bau"][value="0"]').checked = true;
+    
+        irParaEtapa3(); // pula direto pra etapa 3
+      }
+    
+      // Inicializa subtotais
+      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
+      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
+    };
   </script>
 </body>
 </html>
