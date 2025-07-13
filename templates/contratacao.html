@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contratação - Monte seu Plano</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center px-4">
+  <div class="max-w-4xl w-full">
+    <h1 class="text-3xl font-bold text-center mb-8">Monte seu plano</h1>
+
+    <!-- Etapa 1: Serviços Principais -->
+    <div id="etapa1" class="space-y-8">
+      <h2 class="text-xl font-semibold mb-4">Serviços Inclusos</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Guincho -->
+        <div class="bg-white text-black rounded p-4">
+          <h3 class="font-bold mb-2">Guincho</h3>
+          <label class="block"><input type="radio" name="guincho" value="0"> 200KM (R$0,00)</label>
+          <label class="block"><input type="radio" name="guincho" value="30"> 400KM (R$30,00)</label>
+          <label class="block"><input type="radio" name="guincho" value="50"> 800KM (R$50,00)</label>
+        </div>
+
+        <!-- Proteção Terceiros -->
+        <div class="bg-white text-black rounded p-4">
+          <h3 class="font-bold mb-2">Proteção a Terceiros</h3>
+          <label class="block"><input type="radio" name="terceiros" value="0"> R$40.000 (R$0,00)</label>
+          <label class="block"><input type="radio" name="terceiros" value="30"> R$70.000 (R$30,00)</label>
+        </div>
+
+        <!-- Rastreador -->
+        <div class="bg-white text-black rounded p-4">
+          <h3 class="font-bold mb-2">Rastreador</h3>
+          <label class="block"><input type="radio" name="rastreador" value="0"> Não</label>
+          <label class="block"><input type="radio" name="rastreador" value="30" checked> Sim (R$30,00)</label>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="irParaEtapa2()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
+      </div>
+    </div>
+
+    <!-- Etapa 2: Adicionais -->
+    <div id="etapa2" class="space-y-8 hidden">
+      <h2 class="text-xl font-semibold mb-4">Adicionais</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- VFLR -->
+        <div class="bg-white text-black rounded p-4">
+          <h3 class="font-bold mb-2">Vidros, Faróis, Lanternas e Retrovisores</h3>
+          <label class="block"><input type="radio" name="vflr" value="0"> Não (R$0,00)</label>
+          <label class="block"><input type="radio" name="vflr" value="20"> Sim (R$20,00)</label>
+        </div>
+
+        <!-- Incêndio e Alagamento -->
+        <div class="bg-white text-black rounded p-4">
+          <h3 class="font-bold mb-2">Incêndio e Alagamento</h3>
+          <label class="block"><input type="radio" name="incendio" value="0"> Não (R$0,00)</label>
+          <label class="block"><input type="radio" name="incendio" value="25"> Sim (R$25,00)</label>
+        </div>
+
+        <!-- Proteção Baú -->
+        <div class="bg-white text-black rounded p-4">
+          <h3 class="font-bold mb-2">Proteção para Baú (se aplicável)</h3>
+          <label class="block"><input type="radio" name="bau" value="0"> Não (R$0,00)</label>
+          <label class="block"><input type="radio" name="bau" value="90"> Sim (R$90,00)</label>
+        </div>
+      </div>
+
+      <div class="flex justify-between">
+        <button onclick="voltarEtapa1()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
+        <button onclick="irParaEtapa3()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
+      </div>
+    </div>
+
+    <!-- Etapa 3: Adesivo -->
+    <div id="etapa3" class="space-y-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">Adesivo</h2>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="adesivo" class="form-checkbox text-blue-500">
+        Aceito adesivar meu veículo e ganhar benefícios
+      </label>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <label class="bg-white text-black rounded p-4 block">
+          <input type="checkbox" name="beneficio" value="-20"> Desconto mensal de R$ 20,00
+        </label>
+        <label class="bg-white text-black rounded p-4 block">
+          <input type="checkbox" name="beneficio" value="0"> VFLR incluso gratuitamente
+        </label>
+        <label class="bg-white text-black rounded p-4 block">
+          <input type="checkbox" name="beneficio" value="0"> R$1.000,00 de desconto na participação
+        </label>
+      </div>
+
+      <div class="mt-6 text-right">
+        <button onclick="finalizarPlano()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
+      </div>
+
+      <div class="mt-8 bg-gray-800 p-4 rounded">
+        <h3 class="text-lg font-semibold mb-2">Subtotal</h3>
+        <p id="subtotalSeguro">Seguro: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+        <p id="subtotalDesconto">Descontos: <span class="text-green-300 font-bold">- R$ 0,00</span></p>
+        <p id="subtotalAdicionais">Adicionais: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function irParaEtapa2() {
+      document.getElementById('etapa1').classList.add('hidden');
+      document.getElementById('etapa2').classList.remove('hidden');
+    }
+
+    function voltarEtapa1() {
+      document.getElementById('etapa2').classList.add('hidden');
+      document.getElementById('etapa1').classList.remove('hidden');
+    }
+
+    function irParaEtapa3() {
+      document.getElementById('etapa2').classList.add('hidden');
+      document.getElementById('etapa3').classList.remove('hidden');
+    }
+
+    function finalizarPlano() {
+      const seguroBase = 300; // valor simulado estático, pode vir da API
+      const comDesconto = 270; // idem
+
+      let adicionais = 0;
+      ['guincho', 'terceiros', 'rastreador', 'vflr', 'incendio', 'bau'].forEach(nome => {
+        const selecionado = document.querySelector(`input[name=${nome}]:checked`);
+        if (selecionado) adicionais += parseFloat(selecionado.value);
+      });
+
+      let desconto = seguroBase - comDesconto;
+
+      if (document.getElementById('adesivo').checked) {
+        const beneficios = document.querySelectorAll('input[name=beneficio]:checked');
+        beneficios.forEach(b => {
+          desconto += parseFloat(b.value);
+        });
+      }
+
+      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${seguroBase.toFixed(2)}</span>`;
+      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${desconto.toFixed(2)}</span>`;
+      document.getElementById('subtotalAdicionais').innerHTML = `Adicionais: <span class='${adicionais > 0 ? 'text-red-400' : 'text-white'} font-bold'>R$ ${adicionais.toFixed(2)}</span>`;
+    }
+  </script>
+</body>
+</html>
