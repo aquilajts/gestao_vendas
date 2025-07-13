@@ -56,22 +56,22 @@
 
     async function buscarValor(fipeStr, categoria) {
       const fipeLimpo = parseFloat(fipeStr.replace(/\./g, '').replace(',', '.')) / 1000;
-
       console.log("FIPE digitada:", fipeLimpo);
-    
+
       const tabelaDesconto = await fetch(`/buscar-faixa?tabela=tabela&fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
       const tabelaSemDesconto = await fetch(`/buscar-faixa?tabela=tabelade&fipe=${fipeLimpo}&coluna=${categoria}`).then(r => r.json());
-    
+
       return {
         comDesconto: tabelaDesconto.valor || "não encontrado",
         semDesconto: tabelaSemDesconto.valor || "não encontrado"
       };
     }
 
-document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
+    document.getElementById("simulacaoForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const categoria = document.getElementById("categoria").value;
       const fipe = document.getElementById("fipe").value;
+      const fipeValor = parseFloat(fipe.replace(/\./g, '').replace(',', '.'));
 
       const resultadoDiv = document.getElementById("resultado");
       resultadoDiv.innerHTML = "<p class='text-gray-400'>Buscando informações...</p>";
@@ -81,29 +81,55 @@ document.getElementById("simulacaoForm").addEventListener("submit", async functi
       if (resultado.erro) {
         resultadoDiv.innerHTML = `<p class='text-red-400'>${resultado.erro}</p>`;
       } else {
+        const rastreadorGratuito = fipeValor >= 70000;
+        const rastreadorChecked = rastreadorGratuito ? "checked" : "";
+        const rastreadorInfo = rastreadorGratuito ? "<p class='text-green-400 text-sm'>Rastreador gratuito para veículos acima de R$ 70.000,00</p>" : "";
+
         resultadoDiv.innerHTML = `
           <p class='text-green-400'>✅ Simulação concluída!</p>
           <p>💰 Mensalidade original: <span class='font-bold'>R$ ${resultado.semDesconto}</span></p>
           <p>🎯 Com desconto: <span class='font-bold text-yellow-400'>R$ ${resultado.comDesconto}</span></p>
+          ${rastreadorInfo}
           <div class='mt-4 space-y-3'>
             <label class='flex items-start gap-2'>
-              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1'>
+              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked}>
               <span>Quero rastreador por + R$30,00 por mês</span>
             </label>
-          
             <label class='flex items-start gap-2'>
               <input type='checkbox' id='adesivo' class='form-checkbox text-blue-500 mt-1'>
               <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
             </label>
-          
             <div class='mt-4 flex flex-col gap-2'>
-              <button class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
-              <button class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
+              <button onclick='planoBasico()' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
+              <button onclick='planoPersonalizado()' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
             </div>
-          </div
+          </div>
         `;
       }
     });
+
+    function planoBasico() {
+      const rastreador = document.getElementById('rastreador').checked;
+      const adesivo = document.getElementById('adesivo').checked;
+
+      let totalExtras = 0;
+      let beneficios = [];
+
+      if (rastreador) totalExtras += 30;
+
+      if (adesivo) {
+        beneficios.push("Desconto de R$ 20,00");
+        beneficios.push("VFLR incluso gratuitamente");
+        beneficios.push("Até R$1.000,00 de bônus na participação");
+        totalExtras -= 20;
+      }
+
+      alert(`Plano básico selecionado.\nExtras: R$ ${totalExtras.toFixed(2)}\nBenefícios: ${beneficios.join(", ")}`);
+    }
+
+    function planoPersonalizado() {
+      alert("Funcionalidade de plano personalizado em construção...");
+    }
   </script>
 </body>
 </html>
