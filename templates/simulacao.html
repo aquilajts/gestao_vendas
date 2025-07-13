@@ -100,8 +100,8 @@
               <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
             </label>
             <div class='mt-4 flex flex-col gap-2'>
-              <button onclick='planoBasico()' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
-              <button onclick='planoPersonalizado()' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
+              <button onclick='irParaContratacao("basico")' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
+              <button onclick='irParaContratacao("personalizado")' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
             </div>
           </div>
         `;
@@ -130,6 +130,24 @@
     function planoPersonalizado() {
       alert("Funcionalidade de plano personalizado em construção...");
     }
+    
+    function irParaContratacao(tipoPlano) {
+      const rastreador = document.getElementById('rastreador')?.checked || false;
+      const adesivo = document.getElementById('adesivo')?.checked || false;
+      const categoria = document.getElementById('categoria')?.value || "";
+      const fipe = document.getElementById('fipe')?.value || "";
+    
+      const params = new URLSearchParams({
+        tipo: tipoPlano,
+        rastreador: rastreador ? "sim" : "nao",
+        adesivo: adesivo ? "sim" : "nao",
+        categoria,
+        fipe
+      });
+    
+      window.location.href = `/contratacao?${params.toString()}`;
+    }
+
   </script>
 </body>
 </html>
