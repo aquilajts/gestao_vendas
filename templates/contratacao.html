@@ -99,7 +99,7 @@
 
       <div class="mt-6 text-right">
         <button onclick="irParaEtapa2()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
-        <button onclick="finalizarPlano()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
+        <button onclick="irParaEtapa4()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Seguir com contratação</button>
       </div>
 
       <div class="mt-8 bg-gray-800 p-4 rounded">
@@ -107,6 +107,28 @@
         <p id="subtotalSeguro">Seguro: <span class="text-red-400 font-bold">R$ 0,00</span></p>
         <p id="subtotalDesconto">Descontos: <span class="text-green-300 font-bold">- R$ 0,00</span></p>
         <p id="subtotalAdicionais">Adicionais: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+      </div>
+    </div>
+
+    <!-- Etapa 4: Dados do Cliente -->
+    <div id="etapa4" class="space-y-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">Preencha seus dados</h2>
+    
+      <div class="space-y-4">
+        <input required id="cliente_nome" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Nome completo *">
+        <input required id="cliente_telefone" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Telefone com DDD *">
+        <input required id="cliente_placa" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Placa do veículo *">
+      </div>
+    
+      <p class="text-sm text-gray-300 mt-4">
+        Preencha todos os campos para seguir com a contratação sem intermédio de um vendedor.<br>
+        Se desejar contato com um representante, clique em finalizar após preencher nome, telefone e placa.<br>
+        <strong>Não se preocupe</strong>, se houver descontos ou campanhas, iremos contatar!
+      </p>
+    
+      <div class="mt-6 text-right">
+        <button onclick="voltarEtapa3()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
+        <button onclick="enviarFormulario()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
       </div>
     </div>
   </div>
@@ -126,7 +148,31 @@
       document.getElementById('etapa2').classList.add('hidden');
       document.getElementById('etapa3').classList.remove('hidden');
     }
+    
+    function irParaEtapa4() {
+      document.getElementById('etapa3').classList.add('hidden');
+      document.getElementById('etapa4').classList.remove('hidden');
+    }
 
+    function voltarEtapa3() {
+      document.getElementById('etapa4').classList.add('hidden');
+      document.getElementById('etapa3').classList.remove('hidden');
+    }
+    
+    function enviarFormulario() {
+      const nome = document.getElementById("cliente_nome").value.trim();
+      const telefone = document.getElementById("cliente_telefone").value.trim();
+      const placa = document.getElementById("cliente_placa").value.trim();
+    
+      if (!nome || !telefone || !placa) {
+        alert("Por favor, preencha todos os campos obrigatórios.");
+        return;
+      }
+    
+      alert(`Formulário enviado com sucesso!\nNome: ${nome}\nTelefone: ${telefone}\nPlaca: ${placa}`);
+    }
+
+    
     function finalizarPlano() {
       const seguroBase = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
       const comDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
@@ -149,12 +195,26 @@
         });
       }
 
-      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${seguroBase.toFixed(2)}</span>`;
-      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${desconto.toFixed(2)}</span>`;
+      const subtotalFinal = comDesconto + adicionais + (desconto < 0 ? 0 : -desconto);
+      document.getElementById('subtotalFinal')?.remove(); // evita duplicatas
+      const resumo = document.createElement('p');
+      resumo.id = 'subtotalFinal';
+      resumo.innerHTML = `Subtotal Final: <span class='text-white font-bold'>R$ ${subtotalFinal.toFixed(2)}</span>`;
+      document.querySelector('#etapa3 .bg-gray-800').appendChild(resumo);
       document.getElementById('subtotalAdicionais').innerHTML = `Adicionais: <span class='${adicionais > 0 ? 'text-red-400' : 'text-white'} font-bold'>R$ ${adicionais.toFixed(2)}</span>`;
 
-      alert(`Plano Finalizado!\n\nMensalidade Original: R$ ${seguroBase.toFixed(2)}\nCom desconto: R$ ${comDesconto.toFixed(2)}\nAdicionais: R$ ${adicionais.toFixed(2)}\nDescontos: R$ ${desconto.toFixed(2)}\n\nBenefícios: ${beneficiosSelecionados.join(', ') || 'Nenhum'}`);
-    }
+      const total = comDesconto + adicionais + (desconto < 0 ? 0 : -desconto);  // desconto já vem negativo se for benefício
+
+      alert(
+        `Plano Finalizado!\n\n` +
+        `Mensalidade Original: R$ ${seguroBase.toFixed(2)}\n` +
+        `Mensalidade com Desconto: R$ ${comDesconto.toFixed(2)}\n` +
+        `Adicionais: R$ ${adicionais.toFixed(2)}\n` +
+        `Descontos: - R$ ${desconto.toFixed(2)}\n` +
+        `\nSubtotal Final: R$ ${total.toFixed(2)}\n` +
+        `\nBenefícios Selecionados: ${beneficiosSelecionados.join(', ') || 'Nenhum'}`
+      );
+
 
     document.getElementById('adesivo').addEventListener('change', function () {
       const ativo = this.checked;
