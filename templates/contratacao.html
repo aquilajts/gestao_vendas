@@ -174,7 +174,6 @@
     
       alert(`Formulário enviado com sucesso!\nNome: ${nome}\nTelefone: ${telefone}\nPlaca: ${placa}`);
     }
-
     
     function finalizarPlano() {
       const seguroBase = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
@@ -218,16 +217,6 @@
         `\nBenefícios Selecionados: ${beneficiosSelecionados.join(', ') || 'Nenhum'}`
       );
 
-
-    document.getElementById('adesivo').addEventListener('change', function () {
-      const ativo = this.checked;
-      const opcoes = document.querySelectorAll('input[name="beneficio"]');
-      opcoes.forEach(opt => {
-        opt.disabled = !ativo;
-        if (!ativo) opt.checked = false;
-      });
-    });
-
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener('change', () => {
         const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
@@ -238,38 +227,47 @@
       });
     });
 
-  window.onload = () => {
-    const original = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-    const desconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
-    const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
-    const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
-    const planoBasico = localStorage.getItem("plano_basico") === "true";
+    window.onload = () => {
+      const original = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
+      const desconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+      const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
+      const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
+      const planoBasico = localStorage.getItem("plano_basico") === "true";
+  
+      if (rastreadorMarcado) {
+        document.querySelector('input[name="rastreador"][value="30"]').checked = true;
+      } else {
+        document.querySelector('input[name="rastreador"][value="0"]').checked = true;
+      }
+  
+      document.getElementById('adesivo').checked = adesivoMarcado;
+      const beneficios = document.querySelectorAll('input[name="beneficio"]');
+      beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
+  
+      if (planoBasico) {
+        document.querySelector('input[name="guincho"][value="0"]').checked = true;
+        document.querySelector('input[name="terceiros"][value="0"]').checked = true;
+        document.querySelector('input[name="vflr"][value="0"]').checked = true;
+        document.querySelector('input[name="incendio"][value="0"]').checked = true;
+        document.querySelector('input[name="bau"][value="0"]').checked = true;
+  
+        document.getElementById('etapa1').classList.add('hidden');
+        document.getElementById('etapa2').classList.add('hidden');
+        document.getElementById('etapa3').classList.remove('hidden');
+      }
+  
+      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
+      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
+    };
 
-    if (rastreadorMarcado) {
-      document.querySelector('input[name="rastreador"][value="30"]').checked = true;
-    } else {
-      document.querySelector('input[name="rastreador"][value="0"]').checked = true;
-    }
-
-    document.getElementById('adesivo').checked = adesivoMarcado;
-    const beneficios = document.querySelectorAll('input[name="beneficio"]');
-    beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
-
-    if (planoBasico) {
-      document.querySelector('input[name="guincho"][value="0"]').checked = true;
-      document.querySelector('input[name="terceiros"][value="0"]').checked = true;
-      document.querySelector('input[name="vflr"][value="0"]').checked = true;
-      document.querySelector('input[name="incendio"][value="0"]').checked = true;
-      document.querySelector('input[name="bau"][value="0"]').checked = true;
-
-      document.getElementById('etapa1').classList.add('hidden');
-      document.getElementById('etapa2').classList.add('hidden');
-      document.getElementById('etapa3').classList.remove('hidden');
-    }
-
-    document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
-    document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
-  };
+    document.getElementById('adesivo').addEventListener('change', function () {
+      const ativo = this.checked;
+      const opcoes = document.querySelectorAll('input[name="beneficio"]');
+      opcoes.forEach(opt => {
+        opt.disabled = !ativo;
+        if (!ativo) opt.checked = false;
+      });
+    });
   </script>
 </body>
 </html>
