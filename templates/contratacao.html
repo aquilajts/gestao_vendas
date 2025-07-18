@@ -113,19 +113,16 @@
     <!-- Etapa 4: Dados do Cliente -->
     <div id="etapa4" class="space-y-6 hidden">
       <h2 class="text-xl font-semibold mb-4">Preencha seus dados</h2>
-    
       <div class="space-y-4">
         <input required id="cliente_nome" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Nome completo *">
         <input required id="cliente_telefone" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Telefone com DDD *">
         <input required id="cliente_placa" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Placa do veículo *">
       </div>
-    
       <p class="text-sm text-gray-300 mt-4">
         Preencha todos os campos para seguir com a contratação sem intermédio de um vendedor.<br>
         Se desejar contato com um representante, clique em finalizar após preencher nome, telefone e placa.<br>
         <strong>Não se preocupe</strong>, se houver descontos ou campanhas, iremos contatar!
       </p>
-    
       <div class="mt-6 text-right">
         <button onclick="voltarEtapa3()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
         <button onclick="enviarFormulario()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
@@ -144,15 +141,15 @@
       document.getElementById('etapa2').classList.add('hidden');
       document.getElementById('etapa1').classList.remove('hidden');
     }
-    
+
     function irParaEtapa3() {
       document.getElementById('etapa2').classList.add('hidden');
       document.getElementById('etapa3').classList.remove('hidden');
-      finalizarPlano(); // <-- calcula e exibe valores
+      finalizarPlano();
     }
-    
+
     function irParaEtapa4() {
-      finalizarPlano(); // calcula tudo antes de avançar
+      finalizarPlano();
       document.getElementById('etapa3').classList.add('hidden');
       document.getElementById('etapa4').classList.remove('hidden');
     }
@@ -161,20 +158,18 @@
       document.getElementById('etapa4').classList.add('hidden');
       document.getElementById('etapa3').classList.remove('hidden');
     }
-    
+
     function enviarFormulario() {
       const nome = document.getElementById("cliente_nome").value.trim();
       const telefone = document.getElementById("cliente_telefone").value.trim();
       const placa = document.getElementById("cliente_placa").value.trim();
-    
       if (!nome || !telefone || !placa) {
         alert("Por favor, preencha todos os campos obrigatórios.");
         return;
       }
-    
       alert(`Formulário enviado com sucesso!\nNome: ${nome}\nTelefone: ${telefone}\nPlaca: ${placa}`);
     }
-    
+
     function finalizarPlano() {
       const seguroBase = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
       const comDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
@@ -198,14 +193,15 @@
       }
 
       const subtotalFinal = comDesconto + adicionais + (desconto < 0 ? 0 : -desconto);
-      document.getElementById('subtotalFinal')?.remove(); // evita duplicatas
+      document.getElementById('subtotalFinal')?.remove();
       const resumo = document.createElement('p');
       resumo.id = 'subtotalFinal';
       resumo.innerHTML = `Subtotal Final: <span class='text-white font-bold'>R$ ${subtotalFinal.toFixed(2)}</span>`;
       document.querySelector('#etapa3 .bg-gray-800').appendChild(resumo);
-      document.getElementById('subtotalAdicionais').innerHTML = `Adicionais: <span class='${adicionais > 0 ? 'text-red-400' : 'text-white'} font-bold'>R$ ${adicionais.toFixed(2)}</span>`;
 
-      const total = comDesconto + adicionais + (desconto < 0 ? 0 : -desconto);  // desconto já vem negativo se for benefício
+      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${comDesconto.toFixed(2)}</span>`;
+      document.getElementById('subtotalAdicionais').innerHTML = `Adicionais: <span class='${adicionais > 0 ? 'text-red-400' : 'text-white'} font-bold'>R$ ${adicionais.toFixed(2)}</span>`;
+      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${desconto.toFixed(2)}</span>`;
 
       alert(
         `Plano Finalizado!\n\n` +
@@ -213,9 +209,20 @@
         `Mensalidade com Desconto: R$ ${comDesconto.toFixed(2)}\n` +
         `Adicionais: R$ ${adicionais.toFixed(2)}\n` +
         `Descontos: - R$ ${desconto.toFixed(2)}\n` +
-        `\nSubtotal Final: R$ ${total.toFixed(2)}\n` +
-        `\nBenefícios Selecionados: ${beneficiosSelecionados.join(', ') || 'Nenhum'}`
+        `\nSubtotal Final: R$ ${subtotalFinal.toFixed(2)}\n` +
+        `\nBenefícios Selecionados: ${beneficiosSelecionados.length ? beneficiosSelecionados.join(', ') : 'Nenhum'}`
       );
+    }
+
+    // Listeners independentes fora de qualquer função
+    document.getElementById('adesivo').addEventListener('change', function () {
+      const ativo = this.checked;
+      const opcoes = document.querySelectorAll('input[name="beneficio"]');
+      opcoes.forEach(opt => {
+        opt.disabled = !ativo;
+        if (!ativo) opt.checked = false;
+      });
+    });
 
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener('change', () => {
@@ -233,41 +240,32 @@
       const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
       const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
       const planoBasico = localStorage.getItem("plano_basico") === "true";
-  
+
       if (rastreadorMarcado) {
         document.querySelector('input[name="rastreador"][value="30"]').checked = true;
       } else {
         document.querySelector('input[name="rastreador"][value="0"]').checked = true;
       }
-  
+
       document.getElementById('adesivo').checked = adesivoMarcado;
       const beneficios = document.querySelectorAll('input[name="beneficio"]');
       beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
-  
+
       if (planoBasico) {
         document.querySelector('input[name="guincho"][value="0"]').checked = true;
         document.querySelector('input[name="terceiros"][value="0"]').checked = true;
         document.querySelector('input[name="vflr"][value="0"]').checked = true;
         document.querySelector('input[name="incendio"][value="0"]').checked = true;
         document.querySelector('input[name="bau"][value="0"]').checked = true;
-  
+
         document.getElementById('etapa1').classList.add('hidden');
         document.getElementById('etapa2').classList.add('hidden');
         document.getElementById('etapa3').classList.remove('hidden');
       }
-  
+
       document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
       document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
     };
-
-    document.getElementById('adesivo').addEventListener('change', function () {
-      const ativo = this.checked;
-      const opcoes = document.querySelectorAll('input[name="beneficio"]');
-      opcoes.forEach(opt => {
-        opt.disabled = !ativo;
-        if (!ativo) opt.checked = false;
-      });
-    });
   </script>
 </body>
 </html>
