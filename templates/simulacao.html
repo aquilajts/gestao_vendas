@@ -84,12 +84,14 @@
       } else {
         const rastreadorGratuito = fipeValor >= 70000;
         const rastreadorChecked = rastreadorGratuito ? "checked" : "";
+        const descontoRastreador = rastreadorGratuito ? 30.00 : 0.00;
         const rastreadorInfo = rastreadorGratuito ? "<p class='text-green-400 text-sm'>Rastreador gratuito para veículos acima de R$ 70.000,00</p>" : "";
 
         // Salvar valores no localStorage
         localStorage.setItem("valor_veiculo", fipeValor);
         localStorage.setItem("mensalidade_original", resultado.semDesconto);
         localStorage.setItem("mensalidade_com_desconto", resultado.comDesconto);
+        localStorage.setItem("desconto_rastreador", descontoRastreador);
 
         resultadoDiv.innerHTML = `
           <p class='text-green-400'>✅ Simulação concluída!</p>
@@ -102,8 +104,8 @@
               <span>Quero rastreador por + R$30,00 por mês</span>
             </label>
             <label class='flex items-start gap-2'>
-              <input type='checkbox' id='adesivo' class='form-checkbox text-blue-500 mt-1'>
-              <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
+              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked} ${rastreadorGratuito ? "disabled" : ""}>
+              <span>Quero rastreador por + R$30,00 por mês</span>
             </label>
             <div class='mt-4 flex flex-col gap-2'>
               <button type='button' onclick='salvarESeguir(true)' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
