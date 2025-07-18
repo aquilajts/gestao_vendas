@@ -194,7 +194,8 @@
         descontos += parseFloat(b.value) || 0;
       });
     }
-
+    descontos += descontoRastreador; // Desconto do rastreador
+    
     const subtotal = mensalidadeComDesconto + adicionais + descontos;
 
     // Atualiza visuais
