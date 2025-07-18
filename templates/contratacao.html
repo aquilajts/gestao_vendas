@@ -18,7 +18,7 @@
         <!-- Guincho -->
         <div class="bg-white text-black rounded p-4">
           <h3 class="font-bold mb-2">Guincho</h3>
-          <label class="block"><input type="radio" name="guincho" value="0"> 200KM (R$0,00)</label>
+          <label class="block"><input type="radio" name="guincho" value="0" checked> 200KM (R$0,00)</label>
           <label class="block"><input type="radio" name="guincho" value="30"> 400KM (R$30,00)</label>
           <label class="block"><input type="radio" name="guincho" value="50"> 800KM (R$50,00)</label>
         </div>
@@ -26,7 +26,7 @@
         <!-- Proteção Terceiros -->
         <div class="bg-white text-black rounded p-4">
           <h3 class="font-bold mb-2">Proteção a Terceiros</h3>
-          <label class="block"><input type="radio" name="terceiros" value="0"> R$40.000 (R$0,00)</label>
+          <label class="block"><input type="radio" name="terceiros" value="0" checked> R$40.000 (R$0,00)</label>
           <label class="block"><input type="radio" name="terceiros" value="30"> R$70.000 (R$30,00)</label>
         </div>
 
@@ -90,10 +90,10 @@
           <input type="checkbox" name="beneficio" value="-20" /> Desconto mensal de R$ 20,00
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20" /> VFLR incluso gratuitamente
+          <input type="checkbox" name="beneficio" value="0" /> VFLR incluso gratuitamente
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="0" /> R$1.000,00 de desconto na participação
+          <input type="checkbox" name="beneficio" value="-1000" /> R$1.000,00 de desconto na participação
         </label>
       </div>
 
@@ -147,13 +147,13 @@
   function irParaEtapa3() {
     esconderEtapas();
     document.getElementById("etapa3").classList.remove("hidden");
-    atualizarTotais(); // garantir cálculo
+    atualizarTotais();
   }
 
   function irParaEtapa4() {
     esconderEtapas();
     document.getElementById("etapa4").classList.remove("hidden");
-    atualizarTotais(); // garantir cálculo
+    atualizarTotais();
   }
 
   function esconderEtapas() {
@@ -164,31 +164,29 @@
   }
 
   function atualizarTotais() {
-    const mensalidadeOriginal = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-    const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0; 
+    const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
 
     let adicionais = 0;
     const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
     camposExtras.forEach(campo => {
       const selecionado = document.querySelector(`input[name=${campo}]:checked`);
-      if (selecionado) adicionais += parseFloat(selecionado.value);
+      if (selecionado) adicionais += parseFloat(selecionado.value) || 0;
     });
 
-    let desconto = mensalidadeOriginal - mensalidadeComDesconto;
-
+    let descontos = 0;
     const adesivoAtivo = document.getElementById("adesivo")?.checked;
     if (adesivoAtivo) {
       const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
       beneficios.forEach(b => {
-        desconto += parseFloat(b.value);
+        descontos += parseFloat(b.value) || 0;
       });
     }
 
-    const subtotal = mensalidade_com_desconto + adicionais + desconto;
+    const subtotal = mensalidadeComDesconto + adicionais + descontos;
 
     // Atualiza visuais
-    document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidade_com_desconto.toFixed(2)}</span>`;
-    document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${desconto.toFixed(2)}</span>`;
+    document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
+    document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${(-descontos).toFixed(2)}</span>`;
     document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
     document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
   }
@@ -213,6 +211,7 @@
   window.onload = () => {
     const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
     const planoBasico = localStorage.getItem("plano_basico") === "true";
+    const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
 
     if (adesivoMarcado) {
       document.getElementById("adesivo").checked = true;
@@ -239,6 +238,7 @@
         opt.disabled = !ativo;
         if (!ativo) opt.checked = false;
       });
+      localStorage.setItem("adesivo_checkbox", ativo);
       atualizarTotais();
     });
 
@@ -253,6 +253,11 @@
       irParaEtapa3();
     } else {
       irParaEtapa1();
+    }
+
+    // Marcação automática do rastreador se valor do veículo > R$ 70.000
+    if (valorVeiculo > 70000) {
+      document.querySelector('input[name="rastreador"][value="30"]').checked = true;
     }
 
     atualizarTotais();
