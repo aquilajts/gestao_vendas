@@ -137,6 +137,7 @@
     function irParaEtapa2() {
       document.getElementById('etapa1').classList.add('hidden');
       document.getElementById('etapa2').classList.remove('hidden');
+      finalizarPlano();
     }
 
     function voltarEtapa1() {
@@ -147,9 +148,11 @@
     function irParaEtapa3() {
       document.getElementById('etapa2').classList.add('hidden');
       document.getElementById('etapa3').classList.remove('hidden');
+      finalizarPlano(); // <-- calcula e exibe valores
     }
     
     function irParaEtapa4() {
+      finalizarPlano(); // calcula tudo antes de avançar
       document.getElementById('etapa3').classList.add('hidden');
       document.getElementById('etapa4').classList.remove('hidden');
     }
@@ -235,38 +238,38 @@
       });
     });
 
-    window.onload = () => {
-      const original = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-      const desconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
-      const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
-      const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
-      const planoBasico = localStorage.getItem("plano_basico") === "true";
+  window.onload = () => {
+    const original = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
+    const desconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+    const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
+    const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
+    const planoBasico = localStorage.getItem("plano_basico") === "true";
 
-      if (rastreadorMarcado) {
-        document.querySelector('input[name="rastreador"][value="30"]').checked = true;
-      } else {
-        document.querySelector('input[name="rastreador"][value="0"]').checked = true;
-      }
+    if (rastreadorMarcado) {
+      document.querySelector('input[name="rastreador"][value="30"]').checked = true;
+    } else {
+      document.querySelector('input[name="rastreador"][value="0"]').checked = true;
+    }
 
-      document.getElementById('adesivo').checked = adesivoMarcado;
-      const beneficios = document.querySelectorAll('input[name="beneficio"]');
-      beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
+    document.getElementById('adesivo').checked = adesivoMarcado;
+    const beneficios = document.querySelectorAll('input[name="beneficio"]');
+    beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
 
-      if (planoBasico) {
-        document.querySelector('input[name="guincho"][value="0"]').checked = true;
-        document.querySelector('input[name="terceiros"][value="0"]').checked = true;
-        document.querySelector('input[name="vflr"][value="0"]').checked = true;
-        document.querySelector('input[name="incendio"][value="0"]').checked = true;
-        document.querySelector('input[name="bau"][value="0"]').checked = true;
+    if (planoBasico) {
+      document.querySelector('input[name="guincho"][value="0"]').checked = true;
+      document.querySelector('input[name="terceiros"][value="0"]').checked = true;
+      document.querySelector('input[name="vflr"][value="0"]').checked = true;
+      document.querySelector('input[name="incendio"][value="0"]').checked = true;
+      document.querySelector('input[name="bau"][value="0"]').checked = true;
 
-        document.getElementById('etapa1').classList.add('hidden');
-        document.getElementById('etapa2').classList.add('hidden');
-        document.getElementById('etapa3').classList.remove('hidden');
-      }
+      document.getElementById('etapa1').classList.add('hidden');
+      document.getElementById('etapa2').classList.add('hidden');
+      document.getElementById('etapa3').classList.remove('hidden');
+    }
 
-      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
-      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
-    };
+    document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
+    document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
+  };
   </script>
 </body>
 </html>
