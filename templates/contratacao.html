@@ -125,7 +125,20 @@
         Se desejar contato com um representante, clique em finalizar após preencher nome, telefone e placa.<br />
         <strong>Não se preocupe</strong>, se houver descontos ou campanhas, iremos contatar!
       </p>
-    
+
+      <!-- Novos campos opcionais -->
+      <div class="space-y-4">
+        <input id="cliente_rua" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Rua" />
+        <input id="cliente_numero" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Número" />
+        <input id="cliente_bairro" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Bairro" />
+        <input id="cliente_cidade" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Cidade" />
+        <input id="cliente_cep" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="CEP" />
+        <input id="cliente_uf" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="UF" />
+        <input id="cliente_telefone_pessoal" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Telefone pessoal" />
+        <input id="cliente_telefone_recado" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Telefone de recado" />
+        <input id="cliente_email" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="E-mail" />
+      </div>
+
       <div class="mt-6 text-right">
         <button onclick="voltarEtapa3()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
         <button onclick="enviarFormulario()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
@@ -195,16 +208,53 @@
     const nome = document.getElementById("cliente_nome").value.trim();
     const telefone = document.getElementById("cliente_telefone").value.trim();
     const placa = document.getElementById("cliente_placa").value.trim();
+    const rua = document.getElementById("cliente_rua").value.trim();
+    const numero = document.getElementById("cliente_numero").value.trim();
+    const bairro = document.getElementById("cliente_bairro").value.trim();
+    const cidade = document.getElementById("cliente_cidade").value.trim();
+    const cep = document.getElementById("cliente_cep").value.trim();
+    const uf = document.getElementById("cliente_uf").value.trim();
+    const telefonePessoal = document.getElementById("cliente_telefone_pessoal").value.trim();
+    const telefoneRecado = document.getElementById("cliente_telefone_recado").value.trim();
+    const email = document.getElementById("cliente_email").value.trim();
 
     if (!nome || !telefone || !placa) {
       alert("Preencha todos os campos obrigatórios.");
       return;
     }
 
-    // Armazena dados no localStorage
+    // Formatar mensagem para WhatsApp
+    let mensagem = `*Nome completo:* ${nome || "Não informado"}\n`;
+    mensagem += `*Telefone:* ${telefone || "Não informado"}\n`;
+    mensagem += `*Placa:* ${placa || "Não informado"}\n`;
+    mensagem += `*Rua:* ${rua || "Não informado"}\n`;
+    mensagem += `*Número:* ${numero || "Não informado"}\n`;
+    mensagem += `*Bairro:* ${bairro || "Não informado"}\n`;
+    mensagem += `*Cidade:* ${cidade || "Não informado"}\n`;
+    mensagem += `*CEP:* ${cep || "Não informado"}\n`;
+    mensagem += `*UF:* ${uf || "Não informado"}\n`;
+    mensagem += `*Telefone pessoal:* ${telefonePessoal || "Não informado"}\n`;
+    mensagem += `*Telefone de recado:* ${telefoneRecado || "Não informado"}\n`;
+    mensagem += `*E-mail:* ${email || "Não informado"}\n`;
+
+    // Armazenar dados no localStorage
     localStorage.setItem("cliente_nome", nome);
     localStorage.setItem("cliente_telefone", telefone);
     localStorage.setItem("cliente_placa", placa);
+    localStorage.setItem("cliente_rua", rua);
+    localStorage.setItem("cliente_numero", numero);
+    localStorage.setItem("cliente_bairro", bairro);
+    localStorage.setItem("cliente_cidade", cidade);
+    localStorage.setItem("cliente_cep", cep);
+    localStorage.setItem("cliente_uf", uf);
+    localStorage.setItem("cliente_telefone_pessoal", telefonePessoal);
+    localStorage.setItem("cliente_telefone_recado", telefoneRecado);
+    localStorage.setItem("cliente_email", email);
+
+    // Direcionar para WhatsApp
+    const numeroWhatsApp = "5527996437717"; // Número do consultor com código do país
+    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+    window.open(urlWhatsApp, '_blank');
   }
 
   // Inicialização
