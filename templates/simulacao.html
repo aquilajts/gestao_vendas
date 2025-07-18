@@ -100,14 +100,8 @@
               <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
             </label>
             <div class='mt-4 flex flex-col gap-2'>
-              <button onclick="contratar(true)" class="bg-green-500 text-white px-4 py-2 rounded mt-4 w-full">
-                Seguir com contratação básica
-              </button>
-              
-              <button onclick="contratar(false)" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 w-full">
-                Crie seu plano
-              </button>
-
+              <button type='button' onclick='salvarESeguir(true)' class='w-full bg-green-500 text-white py-2 rounded font-semibold'>Seguir com contratação básica</button>
+              <button type='button' onclick='salvarESeguir(false)' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
             </div>
           </div>
         `;
@@ -132,32 +126,15 @@
 
       alert(`Plano básico selecionado.\nExtras: R$ ${totalExtras.toFixed(2)}\nBenefícios: ${beneficios.join(", ")}`);
     }
-    
-    function contratar(basico) {
-      const mensalidadeOriginal = parseFloat(document.querySelector("#mensalidade-original")?.dataset.valor || "0");
-      const mensalidadeComDesconto = parseFloat(document.querySelector("#mensalidade-desconto")?.dataset.valor || "0");
-      const rastreadorMarcado = document.querySelector("#check_rastreador")?.checked;
-      const adesivoMarcado = document.querySelector("#check_adesivo")?.checked;
-    
-      // Armazena os valores no localStorage
-      localStorage.setItem("mensalidade_original", mensalidadeOriginal);
-      localStorage.setItem("mensalidade_com_desconto", mensalidadeComDesconto);
-      localStorage.setItem("rastreador_checkbox", rastreadorMarcado);
-      localStorage.setItem("adesivo_checkbox", adesivoMarcado);
-      localStorage.setItem("plano_basico", basico); // true ou false
-    
-      // Redireciona para contratacao.html
-      window.location.href = "contratacao.html";
-    }
-    
+
     function salvarESeguir(planoBasico) {
       const rastreador = document.getElementById("rastreador").checked;
       const adesivo = document.getElementById("adesivo").checked;
     
       localStorage.setItem("mensalidade_original", resultado.semDesconto);
       localStorage.setItem("mensalidade_com_desconto", resultado.comDesconto);
-      localStorage.setItem("rastreador_checkbox", rastreadorMarcado); // true se marcado
-      localStorage.setItem("adesivo_checkbox", adesivoMarcado); // já está funcionando
+      localStorage.setItem("rastreador_checkbox", rastreador);
+      localStorage.setItem("adesivo_checkbox", adesivo);
       localStorage.setItem("plano_basico", planoBasico);
     
       window.location.href = "/contratacao";
