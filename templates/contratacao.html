@@ -165,7 +165,7 @@
 
   function atualizarTotais() {
     const mensalidadeOriginal = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-    const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+    const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0; 
 
     let adicionais = 0;
     const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
@@ -184,10 +184,10 @@
       });
     }
 
-    const subtotal = mensalidadeComDesconto + adicionais + desconto;
+    const subtotal = mensalidade_com_desconto + adicionais + desconto;
 
     // Atualiza visuais
-    document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
+    document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidade_com_desconto.toFixed(2)}</span>`;
     document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${desconto.toFixed(2)}</span>`;
     document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
     document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
