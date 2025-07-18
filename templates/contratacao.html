@@ -76,30 +76,25 @@
       </div>
     </div>
 
-    <!-- Etapa 3: Adesivo -->
-    <div id="etapa3" class="space-y-6 hidden">
+    <!-- Etapa 3: Adesivo (única renderizada caso plano básico) -->
+    <div id="etapa3" class="space-y-6">
       <h2 class="text-xl font-semibold mb-4">Adesivo</h2>
 
       <label class="flex items-center gap-2">
-        <input type="checkbox" id="adesivo" class="form-checkbox text-blue-500">
+        <input type="checkbox" id="adesivo" class="form-checkbox text-blue-500" />
         Aceito adesivar meu veículo e ganhar benefícios
       </label>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20"> Desconto mensal de R$ 20,00
+          <input type="checkbox" name="beneficio" value="-20" /> Desconto mensal de R$ 20,00
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20"> VFLR incluso gratuitamente
+          <input type="checkbox" name="beneficio" value="-20" /> VFLR incluso gratuitamente
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="0"> R$1.000,00 de desconto na participação
+          <input type="checkbox" name="beneficio" value="0" /> R$1.000,00 de desconto na participação
         </label>
-      </div>
-
-      <div class="mt-6 text-right">
-        <button onclick="irParaEtapa2()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
-        <button onclick="irParaEtapa4()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Seguir com contratação</button>
       </div>
 
       <div class="mt-8 bg-gray-800 p-4 rounded">
@@ -107,22 +102,30 @@
         <p id="subtotalSeguro">Seguro: <span class="text-red-400 font-bold">R$ 0,00</span></p>
         <p id="subtotalDesconto">Descontos: <span class="text-green-300 font-bold">- R$ 0,00</span></p>
         <p id="subtotalAdicionais">Adicionais: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+        <p id="subtotalFinal">Subtotal Final: <span class="text-white font-bold">R$ 0,00</span></p>
+      </div>
+
+      <div class="mt-6 text-right">
+        <button onclick="irParaEtapa4()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Seguir com contratação</button>
       </div>
     </div>
 
     <!-- Etapa 4: Dados do Cliente -->
     <div id="etapa4" class="space-y-6 hidden">
       <h2 class="text-xl font-semibold mb-4">Preencha seus dados</h2>
+    
       <div class="space-y-4">
-        <input required id="cliente_nome" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Nome completo *">
-        <input required id="cliente_telefone" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Telefone com DDD *">
-        <input required id="cliente_placa" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Placa do veículo *">
+        <input required id="cliente_nome" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Nome completo *" />
+        <input required id="cliente_telefone" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Telefone com DDD *" />
+        <input required id="cliente_placa" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Placa do veículo *" />
       </div>
+    
       <p class="text-sm text-gray-300 mt-4">
-        Preencha todos os campos para seguir com a contratação sem intermédio de um vendedor.<br>
-        Se desejar contato com um representante, clique em finalizar após preencher nome, telefone e placa.<br>
+        Preencha todos os campos para seguir com a contratação sem intermédio de um vendedor.<br />
+        Se desejar contato com um representante, clique em finalizar após preencher nome, telefone e placa.<br />
         <strong>Não se preocupe</strong>, se houver descontos ou campanhas, iremos contatar!
       </p>
+    
       <div class="mt-6 text-right">
         <button onclick="voltarEtapa3()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
         <button onclick="enviarFormulario()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Finalizar</button>
@@ -131,140 +134,101 @@
   </div>
 
   <script>
-    function irParaEtapa2() {
-      document.getElementById('etapa1').classList.add('hidden');
-      document.getElementById('etapa2').classList.remove('hidden');
-      finalizarPlano();
-    }
+    function atualizarTotais() {
+      const mensalidadeOriginal = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
+      const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
 
-    function voltarEtapa1() {
-      document.getElementById('etapa2').classList.add('hidden');
-      document.getElementById('etapa1').classList.remove('hidden');
-    }
+      let adicionais = 0;
+      const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
+      camposExtras.forEach(campo => {
+        const selecionado = document.querySelector(`input[name=${campo}]:checked`);
+        if (selecionado) adicionais += parseFloat(selecionado.value);
+      });
 
-    function irParaEtapa3() {
-      document.getElementById('etapa2').classList.add('hidden');
-      document.getElementById('etapa3').classList.remove('hidden');
-      finalizarPlano();
+      let desconto = mensalidadeOriginal - mensalidadeComDesconto;
+
+      const adesivoAtivo = document.getElementById("adesivo").checked;
+      if (adesivoAtivo) {
+        const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
+        beneficios.forEach(b => {
+          desconto += parseFloat(b.value);
+        });
+      }
+
+      const subtotal = mensalidadeComDesconto + adicionais;
+
+      // Atualiza visuais
+      document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
+      document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${desconto.toFixed(2)}</span>`;
+      document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
+      document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${(subtotal).toFixed(2)}</span>`;
     }
 
     function irParaEtapa4() {
-      finalizarPlano();
-      document.getElementById('etapa3').classList.add('hidden');
-      document.getElementById('etapa4').classList.remove('hidden');
+      document.getElementById("etapa3").classList.add("hidden");
+      document.getElementById("etapa4").classList.remove("hidden");
     }
 
     function voltarEtapa3() {
-      document.getElementById('etapa4').classList.add('hidden');
-      document.getElementById('etapa3').classList.remove('hidden');
+      document.getElementById("etapa4").classList.add("hidden");
+      document.getElementById("etapa3").classList.remove("hidden");
     }
 
     function enviarFormulario() {
       const nome = document.getElementById("cliente_nome").value.trim();
       const telefone = document.getElementById("cliente_telefone").value.trim();
       const placa = document.getElementById("cliente_placa").value.trim();
+
       if (!nome || !telefone || !placa) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
+        alert("Preencha todos os campos obrigatórios.");
         return;
       }
-      alert(`Formulário enviado com sucesso!\nNome: ${nome}\nTelefone: ${telefone}\nPlaca: ${placa}`);
+
+      // Apenas memorização por enquanto
+      localStorage.setItem("cliente_nome", nome);
+      localStorage.setItem("cliente_telefone", telefone);
+      localStorage.setItem("cliente_placa", placa);
+
+      // Aqui depois você envia para backend
+      alert("Dados salvos com sucesso! Vamos configurar o envio depois.");
     }
-
-    function finalizarPlano() {
-      const seguroBase = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-      const comDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
-      const adesivoAtivo = document.getElementById('adesivo').checked;
-
-      let adicionais = 0;
-      ['guincho', 'terceiros', 'rastreador', 'vflr', 'incendio', 'bau'].forEach(nome => {
-        const selecionado = document.querySelector(`input[name=${nome}]:checked`);
-        if (selecionado) adicionais += parseFloat(selecionado.value);
-      });
-
-      let desconto = seguroBase - comDesconto;
-      let beneficiosSelecionados = [];
-
-      if (adesivoAtivo) {
-        const beneficios = document.querySelectorAll('input[name=beneficio]:checked');
-        beneficios.forEach(b => {
-          desconto += parseFloat(b.value);
-          beneficiosSelecionados.push(b.parentElement.textContent.trim());
-        });
-      }
-
-      const subtotalFinal = comDesconto + adicionais + (desconto < 0 ? 0 : -desconto);
-      document.getElementById('subtotalFinal')?.remove();
-      const resumo = document.createElement('p');
-      resumo.id = 'subtotalFinal';
-      resumo.innerHTML = `Subtotal Final: <span class='text-white font-bold'>R$ ${subtotalFinal.toFixed(2)}</span>`;
-      document.querySelector('#etapa3 .bg-gray-800').appendChild(resumo);
-
-      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${comDesconto.toFixed(2)}</span>`;
-      document.getElementById('subtotalAdicionais').innerHTML = `Adicionais: <span class='${adicionais > 0 ? 'text-red-400' : 'text-white'} font-bold'>R$ ${adicionais.toFixed(2)}</span>`;
-      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${desconto.toFixed(2)}</span>`;
-
-      alert(
-        `Plano Finalizado!\n\n` +
-        `Mensalidade Original: R$ ${seguroBase.toFixed(2)}\n` +
-        `Mensalidade com Desconto: R$ ${comDesconto.toFixed(2)}\n` +
-        `Adicionais: R$ ${adicionais.toFixed(2)}\n` +
-        `Descontos: - R$ ${desconto.toFixed(2)}\n` +
-        `\nSubtotal Final: R$ ${subtotalFinal.toFixed(2)}\n` +
-        `\nBenefícios Selecionados: ${beneficiosSelecionados.length ? beneficiosSelecionados.join(', ') : 'Nenhum'}`
-      );
-    }
-
-    // Listeners independentes fora de qualquer função
-    document.getElementById('adesivo').addEventListener('change', function () {
-      const ativo = this.checked;
-      const opcoes = document.querySelectorAll('input[name="beneficio"]');
-      opcoes.forEach(opt => {
-        opt.disabled = !ativo;
-        if (!ativo) opt.checked = false;
-      });
-    });
-
-    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
-      checkbox.addEventListener('change', () => {
-        const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
-        if (selecionados.length > 2) {
-          checkbox.checked = false;
-          alert("Você pode escolher apenas 2 benefícios.");
-        }
-      });
-    });
 
     window.onload = () => {
-      const original = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-      const desconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
       const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
       const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
       const planoBasico = localStorage.getItem("plano_basico") === "true";
 
-      if (rastreadorMarcado) {
-        document.querySelector('input[name="rastreador"][value="30"]').checked = true;
-      } else {
-        document.querySelector('input[name="rastreador"][value="0"]').checked = true;
+      if (adesivoMarcado) {
+        document.getElementById("adesivo").checked = true;
       }
 
-      document.getElementById('adesivo').checked = adesivoMarcado;
       const beneficios = document.querySelectorAll('input[name="beneficio"]');
-      beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
+      beneficios.forEach(opt => {
+        opt.disabled = !adesivoMarcado;
+      });
 
-      if (planoBasico) {
-        document.querySelector('input[name="guincho"][value="0"]').checked = true;
-        document.querySelector('input[name="terceiros"][value="0"]').checked = true;
-        document.querySelector('input[name="vflr"][value="0"]').checked = true;
-        document.querySelector('input[name="incendio"][value="0"]').checked = true;
-        document.querySelector('input[name="bau"][value="0"]').checked = true;
+      // Limita a 2 benefícios
+      document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
+          if (selecionados.length > 2) {
+            checkbox.checked = false;
+            alert("Você pode escolher no máximo 2 benefícios.");
+          }
+          atualizarTotais();
+        });
+      });
 
-        document.getElementById('etapa1').classList.add('hidden');
-        document.getElementById('etapa2').classList.add('hidden');
-        document.getElementById('etapa3').classList.remove('hidden');
-      }
+      document.getElementById("adesivo").addEventListener("change", () => {
+        const ativo = document.getElementById("adesivo").checked;
+        beneficios.forEach(opt => {
+          opt.disabled = !ativo;
+          if (!ativo) opt.checked = false;
+        });
+        atualizarTotais();
+      });
 
-      document.getElementById('subtotalSeguro').innerHTML = `Seguro: <span class='text-red-400 font-bold'>R$ ${original.toFixed(2)}</span>`;
-      document.getElementById('subtotalDesconto').innerHTML = `Descontos: <span class='text-green-300 font-bold'>- R$ ${(original - desconto).toFixed(2)}</span>`;
+      atualizarTotais();
     };
   </script>
 </body>
