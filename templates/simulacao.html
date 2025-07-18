@@ -78,12 +78,17 @@
 
       const resultado = await buscarValor(fipe, categoria);
 
-      if (resultado.erro) {
-        resultadoDiv.innerHTML = `<p class='text-red-400'>${resultado.erro}</p>`;
+      if (resultado.comDesconto === "não encontrado" || resultado.semDesconto === "não encontrado") {
+        resultadoDiv.innerHTML = `<p class='text-red-400'>Erro ao buscar valores. Tente novamente ou contate o consultor.</p>`;
       } else {
         const rastreadorGratuito = fipeValor >= 70000;
         const rastreadorChecked = rastreadorGratuito ? "checked" : "";
         const rastreadorInfo = rastreadorGratuito ? "<p class='text-green-400 text-sm'>Rastreador gratuito para veículos acima de R$ 70.000,00</p>" : "";
+
+        // Salvar valores no localStorage
+        localStorage.setItem("valor_veiculo", fipeValor);
+        localStorage.setItem("mensalidade_original", resultado.semDesconto);
+        localStorage.setItem("mensalidade_com_desconto", resultado.comDesconto);
 
         resultadoDiv.innerHTML = `
           <p class='text-green-400'>✅ Simulação concluída!</p>
@@ -131,11 +136,12 @@
       const rastreador = document.getElementById("rastreador").checked;
       const adesivo = document.getElementById("adesivo").checked;
     
-      localStorage.setItem("mensalidade_original", resultado.semDesconto);
-      localStorage.setItem("mensalidade_com_desconto", resultado.comDesconto);
+      localStorage.setItem("mensalidade_original", localStorage.getItem("mensalidade_original"));
+      localStorage.setItem("mensalidade_com_desconto", localStorage.getItem("mensalidade_com_desconto"));
       localStorage.setItem("rastreador_checkbox", rastreador);
       localStorage.setItem("adesivo_checkbox", adesivo);
       localStorage.setItem("plano_basico", planoBasico);
+      localStorage.setItem("valor_veiculo", localStorage.getItem("valor_veiculo"));
     
       window.location.href = "/contratacao";
     }    
