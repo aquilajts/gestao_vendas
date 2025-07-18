@@ -223,8 +223,22 @@
       return;
     }
 
+    // Obter subtotal final e opções escolhidas
+    const subtotalFinal = parseFloat(document.getElementById("subtotalFinal").textContent.split("R$ ")[1]) || 0;
+    const guincho = document.querySelector('input[name="guincho"]:checked')?.nextSibling.textContent.trim() || "200KM (R$0,00)";
+    const terceiros = document.querySelector('input[name="terceiros"]:checked')?.nextSibling.textContent.trim() || "R$40.000 (R$0,00)";
+    const rastreador = document.querySelector('input[name="rastreador"]:checked')?.nextSibling.textContent.trim() || "Não";
+    const vflr = document.querySelector('input[name="vflr"]:checked')?.nextSibling.textContent.trim() || "Não (R$0,00)";
+    const incendio = document.querySelector('input[name="incendio"]:checked')?.nextSibling.textContent.trim() || "Não (R$0,00)";
+    const bau = document.querySelector('input[name="bau"]:checked')?.nextSibling.textContent.trim() || "Não (R$0,00)";
+    const adesivo = document.getElementById("adesivo").checked ? "Sim" : "Não";
+    const beneficios = Array.from(document.querySelectorAll('input[name="beneficio"]:checked')).map(b => b.nextSibling.textContent.trim()).join(", ") || "Nenhum";
+
     // Formatar mensagem para WhatsApp
-    let mensagem = `*Nome completo:* ${nome || "Não informado"}\n`;
+    let mensagem = `Olá Áquila, tudo bem?\nRealizei uma simulação e gostei da oferta! O valor final ficou em R$ ${subtotalFinal.toFixed(2)}, com as seguintes opções:\n`;
+    mensagem += `- Guincho: ${guincho}\n- Proteção a Terceiros: ${terceiros}\n- Rastreador: ${rastreador}\n- VFLR: ${vflr}\n- Incêndio e Alagamento: ${incendio}\n- Proteção para Baú: ${bau}\n- Adesivo: ${adesivo}\n- Benefícios: ${beneficios}\n\n`;
+    mensagem += `Segue meus dados:\n`;
+    mensagem += `*Nome completo:* ${nome || "Não informado"}\n`;
     mensagem += `*Telefone:* ${telefone || "Não informado"}\n`;
     mensagem += `*Placa:* ${placa || "Não informado"}\n`;
     mensagem += `*Rua:* ${rua || "Não informado"}\n`;
@@ -235,7 +249,8 @@
     mensagem += `*UF:* ${uf || "Não informado"}\n`;
     mensagem += `*Telefone pessoal:* ${telefonePessoal || "Não informado"}\n`;
     mensagem += `*Telefone de recado:* ${telefoneRecado || "Não informado"}\n`;
-    mensagem += `*E-mail:* ${email || "Não informado"}\n`;
+    mensagem += `*E-mail:* ${email || "Não informado"}\n\n`;
+    mensagem += `Para finalizar, gostaria de saber se há alguma campanha ativa no momento. Já estou pronto para providenciar meu documento com foto (CNH ou RG) e o documento do veículo!`;
 
     // Armazenar dados no localStorage
     localStorage.setItem("cliente_nome", nome);
