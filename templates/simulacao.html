@@ -31,13 +31,14 @@
       <input 
         type="text" 
         id="fipe" 
-        placeholder="Valor tabela FIPE R$ (mínimo 1.000,00 | Se desejar frota, informe na etapa de Dados!)" 
+        placeholder="Valor tabela FIPE R$ (mínimo 1.000,00)" 
         class="w-full p-2 bg-gray-800 rounded placeholder:text-white/30" 
         required 
         oninput="formatarMoeda(this)"
       >
       <button type="submit" class="w-full bg-white text-black py-2 rounded font-semibold">Realizar simulação</button>
-      <p class="text-xs text-center text-gray-400 mt-2">*Os valores precisam ser confirmados por um de nossos consultores, tais como eventuais descontos e promoções NÃO citados!*</p>
+      <p class="text-xs text-center text-gray-400 mt-2">*Os valores precisam ser confirmados por um de nossos consultores, tais como eventuais descontos e promoções NÃO citados!
+ > > Se desejar frota, informe na etapa de Dados*</p>
     </form>
 
     <div id="resultado" class="mt-6 text-center"></div>
