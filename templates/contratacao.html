@@ -133,103 +133,130 @@
     </div>
   </div>
 
-  <script>
-    function atualizarTotais() {
-      const mensalidadeOriginal = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
-      const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+<script>
+  function irParaEtapa1() {
+    esconderEtapas();
+    document.getElementById("etapa1").classList.remove("hidden");
+  }
 
-      let adicionais = 0;
-      const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
-      camposExtras.forEach(campo => {
-        const selecionado = document.querySelector(`input[name=${campo}]:checked`);
-        if (selecionado) adicionais += parseFloat(selecionado.value);
+  function irParaEtapa2() {
+    esconderEtapas();
+    document.getElementById("etapa2").classList.remove("hidden");
+  }
+
+  function irParaEtapa3() {
+    esconderEtapas();
+    document.getElementById("etapa3").classList.remove("hidden");
+    atualizarTotais(); // garantir cálculo
+  }
+
+  function irParaEtapa4() {
+    esconderEtapas();
+    document.getElementById("etapa4").classList.remove("hidden");
+    atualizarTotais(); // garantir cálculo
+  }
+
+  function esconderEtapas() {
+    ["etapa1", "etapa2", "etapa3", "etapa4"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("hidden");
+    });
+  }
+
+  function atualizarTotais() {
+    const mensalidadeOriginal = parseFloat(localStorage.getItem("mensalidade_original")) || 0;
+    const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+
+    let adicionais = 0;
+    const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
+    camposExtras.forEach(campo => {
+      const selecionado = document.querySelector(`input[name=${campo}]:checked`);
+      if (selecionado) adicionais += parseFloat(selecionado.value);
+    });
+
+    let desconto = mensalidadeOriginal - mensalidadeComDesconto;
+
+    const adesivoAtivo = document.getElementById("adesivo")?.checked;
+    if (adesivoAtivo) {
+      const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
+      beneficios.forEach(b => {
+        desconto += parseFloat(b.value);
       });
-
-      let desconto = mensalidadeOriginal - mensalidadeComDesconto;
-
-      const adesivoAtivo = document.getElementById("adesivo").checked;
-      if (adesivoAtivo) {
-        const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
-        beneficios.forEach(b => {
-          desconto += parseFloat(b.value);
-        });
-      }
-
-      const subtotal = mensalidadeComDesconto + adicionais;
-
-      // Atualiza visuais
-      document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
-      document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${desconto.toFixed(2)}</span>`;
-      document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
-      document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${(subtotal).toFixed(2)}</span>`;
     }
 
-    function irParaEtapa4() {
-      document.getElementById("etapa3").classList.add("hidden");
-      document.getElementById("etapa4").classList.remove("hidden");
+    const subtotal = mensalidadeComDesconto + adicionais + desconto;
+
+    // Atualiza visuais
+    document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
+    document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${desconto.toFixed(2)}</span>`;
+    document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
+    document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
+  }
+
+  function enviarFormulario() {
+    const nome = document.getElementById("cliente_nome").value.trim();
+    const telefone = document.getElementById("cliente_telefone").value.trim();
+    const placa = document.getElementById("cliente_placa").value.trim();
+
+    if (!nome || !telefone || !placa) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
     }
 
-    function voltarEtapa3() {
-      document.getElementById("etapa4").classList.add("hidden");
-      document.getElementById("etapa3").classList.remove("hidden");
+    // Armazena dados no localStorage
+    localStorage.setItem("cliente_nome", nome);
+    localStorage.setItem("cliente_telefone", telefone);
+    localStorage.setItem("cliente_placa", placa);
+  }
+
+  // Inicialização
+  window.onload = () => {
+    const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
+    const planoBasico = localStorage.getItem("plano_basico") === "true";
+
+    if (adesivoMarcado) {
+      document.getElementById("adesivo").checked = true;
     }
 
-    function enviarFormulario() {
-      const nome = document.getElementById("cliente_nome").value.trim();
-      const telefone = document.getElementById("cliente_telefone").value.trim();
-      const placa = document.getElementById("cliente_placa").value.trim();
+    const beneficios = document.querySelectorAll('input[name="beneficio"]');
+    beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
 
-      if (!nome || !telefone || !placa) {
-        alert("Preencha todos os campos obrigatórios.");
-        return;
-      }
-
-      // Apenas memorização por enquanto
-      localStorage.setItem("cliente_nome", nome);
-      localStorage.setItem("cliente_telefone", telefone);
-      localStorage.setItem("cliente_placa", placa);
-
-      // Aqui depois você envia para backend
-      alert("Dados salvos com sucesso! Vamos configurar o envio depois.");
-    }
-
-    window.onload = () => {
-      const rastreadorMarcado = localStorage.getItem("rastreador_checkbox") === "true";
-      const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
-      const planoBasico = localStorage.getItem("plano_basico") === "true";
-
-      if (adesivoMarcado) {
-        document.getElementById("adesivo").checked = true;
-      }
-
-      const beneficios = document.querySelectorAll('input[name="beneficio"]');
-      beneficios.forEach(opt => {
-        opt.disabled = !adesivoMarcado;
-      });
-
-      // Limita a 2 benefícios
-      document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-          const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
-          if (selecionados.length > 2) {
-            checkbox.checked = false;
-            alert("Você pode escolher no máximo 2 benefícios.");
-          }
-          atualizarTotais();
-        });
-      });
-
-      document.getElementById("adesivo").addEventListener("change", () => {
-        const ativo = document.getElementById("adesivo").checked;
-        beneficios.forEach(opt => {
-          opt.disabled = !ativo;
-          if (!ativo) opt.checked = false;
-        });
+    // Benefício: máximo 2
+    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
+      checkbox.addEventListener("change", () => {
+        const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
+        if (selecionados.length > 2) {
+          checkbox.checked = false;
+          alert("Você pode escolher no máximo 2 benefícios.");
+        }
         atualizarTotais();
       });
+    });
 
+    document.getElementById("adesivo")?.addEventListener("change", () => {
+      const ativo = document.getElementById("adesivo").checked;
+      beneficios.forEach(opt => {
+        opt.disabled = !ativo;
+        if (!ativo) opt.checked = false;
+      });
       atualizarTotais();
-    };
-  </script>
+    });
+
+    // Plano Básico pula etapas
+    if (planoBasico) {
+      document.querySelector('input[name="guincho"][value="0"]').checked = true;
+      document.querySelector('input[name="terceiros"][value="0"]').checked = true;
+      document.querySelector('input[name="vflr"][value="0"]').checked = true;
+      document.querySelector('input[name="incendio"][value="0"]').checked = true;
+      document.querySelector('input[name="bau"][value="0"]').checked = true;
+      document.querySelector('input[name="rastreador"][value="0"]').checked = true;
+      irParaEtapa3();
+    } else {
+      irParaEtapa1();
+    }
+
+    atualizarTotais();
+  };
+</script>
 </body>
 </html>
