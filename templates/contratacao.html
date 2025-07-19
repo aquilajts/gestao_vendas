@@ -256,8 +256,8 @@
     });
   }
 
-  // Adicionar eventos de mudança para todos os planos
-  document.querySelectorAll('input[name="guincho"], input[name="terceiros"], input[name="vflr"], input[name="incendio"], input[name="bau"]').forEach(radio => {
+  // Adicionar eventos de mudança para todos os planos, incluindo rastreador
+  document.querySelectorAll('input[name="guincho"], input[name="terceiros"], input[name="vflr"], input[name="incendio"], input[name="bau"], input[name="rastreador"]').forEach(radio => {
     radio.addEventListener("change", () => {
       atualizarTotais();
     });
@@ -382,15 +382,25 @@
         b.disabled = !adesivoCheckbox;
       });
 
-      // Verificar se VFLR incluso gratuitamente foi selecionado
+      // Verificar se VFLR incluso gratuitamente foi selecionado e sincronizar
       const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
-      if (vflrBeneficio && vflrBeneficio.checked) {
-        const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
-        if (vflrSim) vflrSim.checked = true;
+      const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
+      if (vflrBeneficio && vflrSim) {
+        if (vflrBeneficio.checked) {
+          vflrSim.checked = true;
+        } else if (!vflrBeneficio.checked) {
+          vflrSim.checked = false;
+        }
       }
       atualizarTotais();
     }
 
+    // Adicionar evento de mudança para benefícios para manter VFLR sincronizado
+    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
+      checkbox.addEventListener("change", () => {
+        atualizarBeneficios(); // Chama a função completa para sincronizar
+      });
+    });
       // Adicionar evento de mudança para benefícios para manter VFLR sincronizado
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
