@@ -204,7 +204,6 @@
     // Ajustar rastreador automaticamente
     if (valorVeiculo >= 70000) {
       document.getElementById("rastreadorSim").checked = true;
-      valorRastreador = 0; // Gratuito
     } else {
       const rastreadorCheckbox = localStorage.getItem("rastreador_checkbox") === "true";
       document.getElementById(rastreadorCheckbox ? "rastreadorSim" : "rastreadorNao").checked = true;
@@ -223,22 +222,16 @@
       const selecionado = document.querySelector(`input[name="${campo}"]:checked`);
       if (selecionado) {
         const valor = parseFloat(selecionado.value) || 0;
-        if (campo === "rastreador") {
-          adicionais += 30; // Adicional fixo de 30,00 sempre que "Sim" for selecionado
+        if (campo === "rastreador" && selecionado.value === "30") {
+          adicionais += 30; // Adicional fixo de 30,00 quando "Sim" é selecionado
         } else {
           adicionais += valor;
         }
       }
     });
-
+    
     let descontos = 0;
-    if (adesivoCheckbox) {
-      const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
-      beneficios.forEach(b => {
-        descontos += parseFloat(b.value) || 0;
-      });
-    }
-    descontos += (valorVeiculo >= 70000 ? descontoRastreador : 0); // Desconto só para >= 70.000
+    descontos += (valorVeiculo >= 70000 && document.getElementById("rastreadorSim").checked ? 30 : 0); // Desconto fixo de 30,00 para veículos >= 70.000 quando "Sim" está marcado
 
     const subtotal = mensalidadeComDesconto + adicionais - descontos;
 
