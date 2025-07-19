@@ -218,12 +218,12 @@
     const telefonePessoal = document.getElementById("cliente_telefone_pessoal").value.trim();
     const telefoneRecado = document.getElementById("cliente_telefone_recado").value.trim();
     const email = document.getElementById("cliente_email").value.trim();
-
+  
     if (!nome || !telefone || !placa) {
       alert("Preencha todos os campos obrigatórios.");
       return;
     }
-
+  
     // Obter subtotal final e opções escolhidas
     const subtotalFinal = parseFloat(document.getElementById("subtotalFinal").textContent.split("R$ ")[1]) || 0;
     const guincho = document.querySelector('input[name="guincho"]:checked')?.nextSibling.textContent.trim() || "200KM (R$0,00)";
@@ -234,9 +234,14 @@
     const bau = document.querySelector('input[name="bau"]:checked')?.nextSibling.textContent.trim() || "Não (R$0,00)";
     const adesivo = document.getElementById("adesivo").checked ? "Sim" : "Não";
     const beneficios = Array.from(document.querySelectorAll('input[name="beneficio"]:checked')).map(b => b.nextSibling.textContent.trim()).join(", ") || "Nenhum";
-
+  
     // Formatar mensagem para WhatsApp
-    let mensagem = `Olá Áquila, tudo bem?\nRealizei uma simulação e gostei da oferta! O valor final ficou em R$ ${subtotalFinal.toFixed(2)}, com as seguintes opções:\n`;
+    let mensagem = `Olá Áquila, tudo bem?\n`;
+    if (localStorage.getItem("plano_basico") === "false" && localStorage.getItem("mensalidade_original") === "0") {
+      mensagem += `Desejo uma cotação da minha frota, [...]\n`;
+    } else {
+      mensagem += `Realizei uma simulação e gostei da oferta! O valor final ficou em R$ ${subtotalFinal.toFixed(2)}, com as seguintes opções:\n`;
+    }
     mensagem += `- Guincho: ${guincho}\n- Proteção a Terceiros: ${terceiros}\n- Rastreador: ${rastreador}\n- VFLR: ${vflr}\n- Incêndio e Alagamento: ${incendio}\n- Proteção para Baú: ${bau}\n- Adesivo: ${adesivo}\n- Benefícios: ${beneficios}\n\n`;
     mensagem += `Segue meus dados:\n`;
     mensagem += `*Nome completo:* ${nome || "Não informado"}\n`;
@@ -252,7 +257,7 @@
     mensagem += `*Telefone de recado:* ${telefoneRecado || "Não informado"}\n`;
     mensagem += `*E-mail:* ${email || "Não informado"}\n\n`;
     mensagem += `Para finalizar, gostaria de saber se há alguma campanha ativa no momento. Já estou pronto para providenciar meu documento com foto (CNH ou RG) e o documento do veículo!`;
-
+  
     // Armazenar dados no localStorage
     localStorage.setItem("cliente_nome", nome);
     localStorage.setItem("cliente_telefone", telefone);
@@ -266,7 +271,7 @@
     localStorage.setItem("cliente_telefone_pessoal", telefonePessoal);
     localStorage.setItem("cliente_telefone_recado", telefoneRecado);
     localStorage.setItem("cliente_email", email);
-
+  
     // Direcionar para WhatsApp
     const numeroWhatsApp = "5527996437717"; // Número do consultor com código do país
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
