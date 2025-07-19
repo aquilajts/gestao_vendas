@@ -138,8 +138,8 @@
     }
 
     function salvarESeguir(planoBasico) {
-      const rastreador = document.getElementById("rastreador").checked;
-      const adesivo = document.getElementById("adesivo").checked;
+      const rastreador = document.getElementById("rastreador") ? document.getElementById("rastreador").checked : false;
+      const adesivo = document.getElementById("adesivo") ? document.getElementById("adesivo").checked : false;
     
       localStorage.setItem("mensalidade_original", localStorage.getItem("mensalidade_original"));
       localStorage.setItem("mensalidade_com_desconto", localStorage.getItem("mensalidade_com_desconto"));
@@ -149,6 +149,7 @@
       localStorage.setItem("valor_veiculo", localStorage.getItem("valor_veiculo"));
     
       window.location.href = "/contratacao";
+    }
     }    
     function planoPersonalizado() {
       alert("Funcionalidade de plano personalizado em construção...");
