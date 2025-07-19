@@ -224,7 +224,7 @@
       if (selecionado) {
         const valor = parseFloat(selecionado.value) || 0;
         if (campo === "rastreador") {
-          adicionais += (valorVeiculo >= 70000 ? 0 : valor); // Adicional só se < 70.000
+          adicionais += 30; // Adicional fixo de 30,00 sempre que "Sim" for selecionado
         } else {
           adicionais += valor;
         }
