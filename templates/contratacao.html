@@ -179,6 +179,7 @@
   function irParaEtapa3() {
     esconderEtapas();
     document.getElementById("etapa3").classList.remove("hidden");
+    sincronizarVFLR(); // Sincroniza VFLR ao carregar a Etapa 3
     atualizarTotais();
   }
 
@@ -383,21 +384,27 @@
       });
 
       // Verificar e sincronizar VFLR imediatamente
+      sincronizarVFLR();
+      atualizarTotais();
+    }
+
+    // Função específica para sincronizar VFLR
+    function sincronizarVFLR() {
       const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
       const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
       if (vflrBeneficio && vflrSim) {
         vflrSim.checked = vflrBeneficio.checked; // Sincroniza diretamente o estado
       }
-      atualizarTotais();
     }
 
     // Adicionar evento de mudança para benefícios para manter VFLR sincronizado e atualizar totais
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
-        atualizarBeneficios(); // Chama a função completa para sincronizar e atualizar
+        sincronizarVFLR(); // Chama a função específica para sincronizar VFLR
+        atualizarTotais(); // Atualiza os totais
       });
     });
-
+  
     // Limitar a 2 benefícios
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
