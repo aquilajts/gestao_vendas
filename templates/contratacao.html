@@ -10,8 +10,42 @@
   <div class="max-w-4xl w-full">
     <h1 class="text-3xl font-bold text-center mb-8">Monte seu plano</h1>
 
-    <!-- Etapa 1: Serviços Principais -->
-    <div id="etapa1" class="space-y-8">
+    <!-- Etapa 1: Adesivo -->
+    <div id="etapa1" class="space-y-6">
+      <h2 class="text-xl font-semibold mb-4">Adesivo</h2>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="adesivo" class="form-checkbox text-blue-500" onchange="atualizarBeneficios()" />
+        Aceito adesivar meu veículo e ganhar benefícios
+      </label>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="beneficiosContainer" style="display: none;">
+        <label class="bg-white text-black rounded p-4 block">
+          <input type="checkbox" name="beneficio" value="-20" /> Desconto mensal de R$ 20,00
+        </label>
+        <label class="bg-white text-black rounded p-4 block">
+          <input type="checkbox" name="beneficio" value="-20" /> VFLR incluso gratuitamente
+        </label>
+        <label class="bg-white text-black rounded p-4 block">
+          <input type="checkbox" name="beneficio" value="0" /> R$1.000,00 de desconto na participação
+        </label>
+      </div>
+
+      <div class="mt-8 bg-gray-800 p-4 rounded">
+        <h3 class="text-lg font-semibold mb-2">Subtotal</h3>
+        <p id="subtotalSeguro">Seguro: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+        <p id="subtotalDesconto">Descontos: <span class="text-green-300 font-bold">- R$ 0,00</span></p>
+        <p id="subtotalAdicionais">Adicionais: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+        <p id="subtotalFinal">Subtotal Final: <span class="text-white font-bold">R$ 0,00</span></p>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="irParaEtapa2()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
+      </div>
+    </div>
+
+    <!-- Etapa 2: Serviços Principais -->
+    <div id="etapa2" class="space-y-8 hidden">
       <h2 class="text-xl font-semibold mb-4">Serviços Inclusos</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -38,13 +72,22 @@
         </div>
       </div>
 
-      <div class="flex justify-end">
-        <button onclick="irParaEtapa2()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
+      <div class="flex justify-between">
+        <button onclick="voltarEtapa1()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
+        <button onclick="irParaEtapa3()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
+      </div>
+
+      <div class="mt-8 bg-gray-800 p-4 rounded">
+        <h3 class="text-lg font-semibold mb-2">Subtotal</h3>
+        <p id="subtotalSeguro">Seguro: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+        <p id="subtotalDesconto">Descontos: <span class="text-green-300 font-bold">- R$ 0,00</span></p>
+        <p id="subtotalAdicionais">Adicionais: <span class="text-red-400 font-bold">R$ 0,00</span></p>
+        <p id="subtotalFinal">Subtotal Final: <span class="text-white font-bold">R$ 0,00</span></p>
       </div>
     </div>
 
-    <!-- Etapa 2: Adicionais -->
-    <div id="etapa2" class="space-y-8 hidden">
+    <!-- Etapa 3: Adicionais -->
+    <div id="etapa3" class="space-y-8 hidden">
       <h2 class="text-xl font-semibold mb-4">Adicionais</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -71,30 +114,8 @@
       </div>
 
       <div class="flex justify-between">
-        <button onclick="voltarEtapa1()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
-        <button onclick="irParaEtapa3()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
-      </div>
-    </div>
-
-    <!-- Etapa 3: Adesivo (única renderizada caso plano básico) -->
-    <div id="etapa3" class="space-y-6">
-      <h2 class="text-xl font-semibold mb-4">Adesivo</h2>
-
-      <label class="flex items-center gap-2">
-        <input type="checkbox" id="adesivo" class="form-checkbox text-blue-500" />
-        Aceito adesivar meu veículo e ganhar benefícios
-      </label>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="20" /> Desconto mensal de R$ 20,00
-        </label>
-        <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="20" /> VFLR incluso gratuitamente
-        </label>
-        <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="0" /> R$1.000,00 de desconto na participação
-        </label>
+        <button onclick="voltarEtapa2()" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded font-semibold">Voltar</button>
+        <button onclick="irParaEtapa4()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold">Próxima</button>
       </div>
 
       <div class="mt-8 bg-gray-800 p-4 rounded">
@@ -103,10 +124,6 @@
         <p id="subtotalDesconto">Descontos: <span class="text-green-300 font-bold">- R$ 0,00</span></p>
         <p id="subtotalAdicionais">Adicionais: <span class="text-red-400 font-bold">R$ 0,00</span></p>
         <p id="subtotalFinal">Subtotal Final: <span class="text-white font-bold">R$ 0,00</span></p>
-      </div>
-
-      <div class="mt-6 text-right">
-        <button onclick="irParaEtapa4()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold">Seguir com contratação</button>
       </div>
     </div>
 
@@ -177,12 +194,11 @@
     atualizarTotais();
   }
 
-  function voltarEtapa3() {
+  function voltarEtapa2() {
     esconderEtapas();
-    document.getElementById("etapa3").classList.remove("hidden");
+    document.getElementById("etapa2").classList.remove("hidden");
     atualizarTotais();
   }
-
   function esconderEtapas() {
     ["etapa1", "etapa2", "etapa3", "etapa4"].forEach(id => {
       const el = document.getElementById(id);
@@ -193,20 +209,10 @@
   function atualizarTotais() {
     const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
     const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
-    const rastreadorCheckbox = localStorage.getItem("rastreador_checkbox") === "true";
-    const adesivoCheckbox = localStorage.getItem("adesivo_checkbox") === "true";
-    const descontoRastreador = parseFloat(localStorage.getItem("desconto_rastreador")) || 0;
-
-    // Configurar rastreador com base no estado atual
-    const rastreadorSelecionado = document.querySelector('input[name="rastreador"]:checked');
-    let valorRastreador = rastreadorSelecionado ? parseFloat(rastreadorSelecionado.value) : 0;
 
     // Ajustar rastreador automaticamente
     if (valorVeiculo >= 70000) {
       document.getElementById("rastreadorSim").checked = true;
-    } else {
-      const rastreadorCheckbox = localStorage.getItem("rastreador_checkbox") === "true";
-      document.getElementById(rastreadorCheckbox ? "rastreadorSim" : "rastreadorNao").checked = true;
     }
 
     // Adicionar evento para recalcular ao mudar o rastreador
@@ -229,22 +235,34 @@
         }
       }
     });
-    
+
     let descontos = 0;
-    const adesivoCheckbox = localStorage.getItem("adesivo_checkbox") === "true"; // Verifica se o adesivo foi marcado anteriormente
+    const adesivoCheckbox = document.getElementById("adesivo")?.checked || false;
     if (adesivoCheckbox) {
-      descontos += 20; // Desconto fixo de R$ 20,00 para adesivo, conforme benefício anterior
+      const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
+      beneficios.forEach(b => {
+        descontos += parseFloat(b.value) || 0;
+      });
     }
     descontos += (valorVeiculo >= 70000 && document.getElementById("rastreadorSim").checked ? 30 : 0); // Desconto fixo de 30,00 para veículos >= 70.000 quando "Sim" está marcado
+
     const subtotal = mensalidadeComDesconto + adicionais - descontos;
 
-    // Atualiza visuais
-    document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
-    document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${descontos.toFixed(2)}</span>`;
-    document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
-    document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
+    // Atualiza visuais em todas as etapas
+    document.querySelectorAll("#subtotalSeguro").forEach(el => {
+      el.innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
+    });
+    document.querySelectorAll("#subtotalDesconto").forEach(el => {
+      el.innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${descontos.toFixed(2)}</span>`;
+    });
+    document.querySelectorAll("#subtotalAdicionais").forEach(el => {
+      el.innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
+    });
+    document.querySelectorAll("#subtotalFinal").forEach(el => {
+      el.innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
+    });
   }
-
+  
   function enviarFormulario() {
     const nome = document.getElementById("cliente_nome").value.trim();
     const telefone = document.getElementById("cliente_telefone").value.trim();
@@ -319,30 +337,27 @@
   }
 
   // Inicialização
+  // Inicialização
   window.onload = () => {
-    const adesivoMarcado = localStorage.getItem("adesivo_checkbox") === "true";
     const planoBasico = localStorage.getItem("plano_basico") === "true";
     const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
 
-    if (adesivoMarcado) {
-      document.getElementById("adesivo").checked = true;
+    // Plano Básico pula etapas
+    if (planoBasico) {
+      document.querySelector('input[name="guincho"][value="0"]').checked = true;
+      document.querySelector('input[name="terceiros"][value="0"]').checked = true;
+      document.querySelector('input[name="vflr"][value="0"]').checked = true;
+      document.querySelector('input[name="incendio"][value="0"]').checked = true;
+      document.querySelector('input[name="bau"][value="0"]').checked = true;
+      document.querySelector('input[name="rastreador"][value="0"]').checked = true;
+      irParaEtapa1(); // Ajustado para ir para Etapa 1 (Adesivo)
+    } else {
+      irParaEtapa1();
     }
 
-    const beneficios = document.querySelectorAll('input[name="beneficio"]');
-    beneficios.forEach(opt => opt.disabled = !adesivoMarcado);
-
-    // Benefício: máximo 2
-    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
-      checkbox.addEventListener("change", () => {
-        const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
-        if (selecionados.length > 2) {
-          checkbox.checked = false;
-          alert("Você pode escolher no máximo 2 benefícios.");
-        }
-        atualizarTotais();
-      });
-    });
-
+    atualizarTotais();
+  };
+  
     document.getElementById("adesivo")?.addEventListener("change", () => {
       const ativo = document.getElementById("adesivo").checked;
       beneficios.forEach(opt => {
@@ -369,6 +384,30 @@
     // Garantir que a função atualizarTotais seja chamada na inicialização
     atualizarTotais();
   };
+    function atualizarBeneficios() {
+      const adesivoCheckbox = document.getElementById("adesivo").checked;
+      const beneficiosContainer = document.getElementById("beneficiosContainer");
+      const beneficios = document.querySelectorAll('input[name="beneficio"]');
+
+      beneficiosContainer.style.display = adesivoCheckbox ? "grid" : "none";
+      beneficios.forEach(b => {
+        b.checked = false;
+        b.disabled = !adesivoCheckbox;
+      });
+      atualizarTotais();
+    }
+
+    // Limitar a 2 benefícios
+    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
+      checkbox.addEventListener("change", () => {
+        const selecionados = document.querySelectorAll('input[name="beneficio"]:checked');
+        if (selecionados.length > 2) {
+          checkbox.checked = false;
+          alert("Você pode escolher no máximo 2 benefícios.");
+        }
+        atualizarTotais();
+      });
+    });  
 </script>
 </body>
 </html>
