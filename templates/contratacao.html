@@ -381,8 +381,29 @@
         b.checked = false;
         b.disabled = !adesivoCheckbox;
       });
+
+      // Verificar se VFLR incluso gratuitamente foi selecionado
+      const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
+      if (vflrBeneficio && vflrBeneficio.checked) {
+        const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
+        if (vflrSim) vflrSim.checked = true;
+      }
       atualizarTotais();
     }
+
+      // Adicionar evento de mudança para benefícios para manter VFLR sincronizado
+    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
+      checkbox.addEventListener("change", () => {
+        const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
+        const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
+        if (vflrBeneficio && vflrBeneficio.checked && vflrSim) {
+          vflrSim.checked = true;
+        } else if (vflrSim && !vflrBeneficio.checked) {
+          vflrSim.checked = false; // Desmarca se o benefício VFLR for desmarcado
+        }
+        atualizarTotais();
+      });
+    });
 
     // Limitar a 2 benefícios
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
