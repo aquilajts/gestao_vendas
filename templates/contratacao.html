@@ -231,8 +231,11 @@
     });
     
     let descontos = 0;
+    const adesivoCheckbox = localStorage.getItem("adesivo_checkbox") === "true"; // Verifica se o adesivo foi marcado anteriormente
+    if (adesivoCheckbox) {
+      descontos += 20; // Desconto fixo de R$ 20,00 para adesivo, conforme benefício anterior
+    }
     descontos += (valorVeiculo >= 70000 && document.getElementById("rastreadorSim").checked ? 30 : 0); // Desconto fixo de 30,00 para veículos >= 70.000 quando "Sim" está marcado
-
     const subtotal = mensalidadeComDesconto + adicionais - descontos;
 
     // Atualiza visuais
