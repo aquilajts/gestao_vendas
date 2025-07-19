@@ -87,10 +87,10 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20" /> Desconto mensal de R$ 20,00
+          <input type="checkbox" name="beneficio" value="20" /> Desconto mensal de R$ 20,00
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20" /> VFLR incluso gratuitamente
+          <input type="checkbox" name="beneficio" value="20" /> VFLR incluso gratuitamente
         </label>
         <label class="bg-white text-black rounded p-4 block">
           <input type="checkbox" name="beneficio" value="0" /> R$1.000,00 de desconto na participação
@@ -197,20 +197,38 @@
     const adesivoCheckbox = localStorage.getItem("adesivo_checkbox") === "true";
     const descontoRastreador = parseFloat(localStorage.getItem("desconto_rastreador")) || 0;
 
-    // Configurar rastreador automaticamente
+    // Configurar rastreador com base no estado atual
+    const rastreadorSelecionado = document.querySelector('input[name="rastreador"]:checked');
+    let valorRastreador = rastreadorSelecionado ? parseFloat(rastreadorSelecionado.value) : 0;
+
+    // Ajustar rastreador automaticamente
     if (valorVeiculo >= 70000) {
       document.getElementById("rastreadorSim").checked = true;
-    } else if (rastreadorCheckbox) {
-      document.getElementById("rastreadorSim").checked = true;
+      valorRastreador = 0; // Gratuito
     } else {
-      document.getElementById("rastreadorNao").checked = true;
+      const rastreadorCheckbox = localStorage.getItem("rastreador_checkbox") === "true";
+      document.getElementById(rastreadorCheckbox ? "rastreadorSim" : "rastreadorNao").checked = true;
     }
+
+    // Adicionar evento para recalcular ao mudar o rastreador
+    document.querySelectorAll('input[name="rastreador"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        atualizarTotais();
+      });
+    });
 
     let adicionais = 0;
     const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
     camposExtras.forEach(campo => {
       const selecionado = document.querySelector(`input[name="${campo}"]:checked`);
-      if (selecionado) adicionais += parseFloat(selecionado.value) || 0;
+      if (selecionado) {
+        const valor = parseFloat(selecionado.value) || 0;
+        if (campo === "rastreador") {
+          adicionais += (valorVeiculo >= 70000 ? 0 : valor); // Adicional só se < 70.000
+        } else {
+          adicionais += valor;
+        }
+      }
     });
 
     let descontos = 0;
@@ -220,7 +238,7 @@
         descontos += parseFloat(b.value) || 0;
       });
     }
-    descontos += (rastreadorCheckbox && valorVeiculo < 70000 ? 0 : descontoRastreador); // Desconto só se não for gratuito
+    descontos += (valorVeiculo >= 70000 ? descontoRastreador : 0); // Desconto só para >= 70.000
 
     const subtotal = mensalidadeComDesconto + adicionais - descontos;
 
