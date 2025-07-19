@@ -378,8 +378,8 @@
 
       beneficiosContainer.style.display = adesivoCheckbox ? "grid" : "none";
       beneficios.forEach(b => {
-        b.checked = false;
-        b.disabled = !adesivoCheckbox;
+        b.disabled = !adesivoCheckbox; // Apenas desabilita, mas permite marcar se habilitado
+        if (!adesivoCheckbox) b.checked = false; // Desmarca apenas se desativado
       });
 
       // Verificar se VFLR incluso gratuitamente foi selecionado e sincronizar
@@ -395,12 +395,22 @@
       atualizarTotais();
     }
 
-    // Adicionar evento de mudança para benefícios para manter VFLR sincronizado
+    // Adicionar evento de mudança para benefícios para manter VFLR sincronizado e atualizar totais
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
-        atualizarBeneficios(); // Chama a função completa para sincronizar
+        const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
+        const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
+        if (vflrBeneficio && vflrSim) {
+          if (vflrBeneficio.checked) {
+            vflrSim.checked = true;
+          } else if (!vflrBeneficio.checked) {
+            vflrSim.checked = false;
+          }
+        }
+        atualizarTotais();
       });
     });
+  
       // Adicionar evento de mudança para benefícios para manter VFLR sincronizado
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
