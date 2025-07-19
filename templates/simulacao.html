@@ -73,7 +73,7 @@
       e.preventDefault();
       const categoria = document.getElementById("categoria").value;
       const fipe = document.getElementById("fipe").value;
-      const fipeValor = parseFloat(fipe.replace(/\./g, '').replace(',', '.'));
+      const fipeValor = parseFloat(fipe.replace(/\./g, '').replace(',', '.')) || 0;
 
       const resultadoDiv = document.getElementById("resultado");
       resultadoDiv.innerHTML = "<p class='text-gray-400'>Buscando informações...</p>";
@@ -88,24 +88,27 @@
         const descontoRastreador = rastreadorGratuito ? 30.00 : 0.00;
         const rastreadorInfo = rastreadorGratuito ? "<p class='text-green-400 text-sm'>Rastreador gratuito para veículos acima de R$ 70.000,00</p>" : "";
 
-        // Salvar valores no localStorage com desconto de rastreador
-        localStorage.setItem("valor_veiculo", fipeValor);
-        localStorage.setItem("mensalidade_original", resultado.semDesconto);
-        localStorage.setItem("mensalidade_com_desconto", (parseFloat(resultado.comDesconto) - (rastreadorGratuito ? descontoRastreador : 0)).toFixed(2));
-        localStorage.setItem("desconto_rastreador", descontoRastreador);
+        // Calcular mensalidade com desconto considerando o rastreador gratuito
+        const mensalidadeComDesconto = parseFloat(resultado.comDesconto) - (rastreadorGratuito ? descontoRastreador : 0);
+
+        // Salvar valores no localStorage
+        localStorage.setItem("valor_veiculo", fipeValor.toFixed(2));
+        localStorage.setItem("mensalidade_original", parseFloat(resultado.semDesconto).toFixed(2));
+        localStorage.setItem("mensalidade_com_desconto", mensalidadeComDesconto.toFixed(2));
+        localStorage.setItem("desconto_rastreador", descontoRastreador.toFixed(2));
 
         resultadoDiv.innerHTML = `
           <p class='text-green-400'>✅ Simulação concluída!</p>
-          <p>💰 Mensalidade original: <span class='font-bold'>R$ ${resultado.semDesconto}</span></p>
-          <p>🎯 Com desconto: <span class='font-bold text-yellow-400'>R$ ${(parseFloat(resultado.comDesconto) - (rastreadorGratuito ? descontoRastreador : 0)).toFixed(2)}</span></p>
+          <p>💰 Mensalidade original: <span class='font-bold'>R$ ${parseFloat(resultado.semDesconto).toFixed(2)}</span></p>
+          <p>🎯 Com desconto: <span class='font-bold text-yellow-400'>R$ ${mensalidadeComDesconto.toFixed(2)}</span></p>
           ${rastreadorInfo}
           <div class='mt-4 space-y-3'>
             <label class='flex items-start gap-2'>
-              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked} ${rastreadorGratuito ? "disabled" : ""}>
+              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked} ${rastreadorGratuito ? "disabled" : ""} onchange="salvarRastreador(this.checked)">
               <span>Quero rastreador por + R$30,00 por mês</span>
             </label>
             <label class='flex items-start gap-2'>
-              <input type='checkbox' id='adesivo' class='form-checkbox text-blue-500 mt-1'>
+              <input type='checkbox' id='adesivo' class='form-checkbox text-blue-500 mt-1' onchange="salvarAdesivo(this.checked)">
               <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
             </label>
             <div class='mt-4 flex flex-col gap-2'>
@@ -117,8 +120,7 @@
     });
 
     function irParaEtapa4Frota() {
-      // Redirecionar diretamente para Etapa 4 sem depender dos campos preenchidos
-      localStorage.setItem("plano_basico", "false"); // Apenas o mínimo necessário para frota
+      localStorage.setItem("plano_basico", "false");
       window.location.href = "/contratacao?etapa=4";
     }
 
@@ -142,17 +144,32 @@
     }
 
     function salvarESeguir(planoBasico) {
-      const rastreador = document.getElementById("rastreador").checked;
-      const adesivo = document.getElementById("adesivo").checked;
+      const rastreador = document.getElementById("rastreador") ? document.getElementById("rastreador").checked : false;
+      const adesivo = document.getElementById("adesivo") ? document.getElementById("adesivo").checked : false;
 
-      localStorage.setItem("mensalidade_original", localStorage.getItem("mensalidade_original"));
-      localStorage.setItem("mensalidade_com_desconto", localStorage.getItem("mensalidade_com_desconto"));
+      // Garantir que os valores sejam salvos corretamente antes do redirecionamento
+      const mensalidadeOriginal = localStorage.getItem("mensalidade_original") || "0";
+      const mensalidadeComDesconto = localStorage.getItem("mensalidade_com_desconto") || "0";
+      const valorVeiculo = localStorage.getItem("valor_veiculo") || "0";
+      const descontoRastreador = localStorage.getItem("desconto_rastreador") || "0";
+
+      localStorage.setItem("mensalidade_original", mensalidadeOriginal);
+      localStorage.setItem("mensalidade_com_desconto", mensalidadeComDesconto);
       localStorage.setItem("rastreador_checkbox", rastreador);
       localStorage.setItem("adesivo_checkbox", adesivo);
       localStorage.setItem("plano_basico", planoBasico);
-      localStorage.setItem("valor_veiculo", localStorage.getItem("valor_veiculo"));
+      localStorage.setItem("valor_veiculo", valorVeiculo);
+      localStorage.setItem("desconto_rastreador", descontoRastreador);
 
       window.location.href = "/contratacao";
+    }
+
+    function salvarRastreador(checked) {
+      localStorage.setItem("rastreador_checkbox", checked);
+    }
+
+    function salvarAdesivo(checked) {
+      localStorage.setItem("adesivo_checkbox", checked);
     }
 
     function planoPersonalizado() {
