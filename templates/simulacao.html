@@ -102,18 +102,8 @@
           <p>💰 Mensalidade original: <span class='font-bold'>R$ ${parseFloat(resultado.semDesconto).toFixed(2)}</span></p>
           <p>🎯 Com desconto: <span class='font-bold text-yellow-400'>R$ ${mensalidadeComDesconto.toFixed(2)}</span></p>
           ${rastreadorInfo}
-          <div class='mt-4 space-y-3'>
-            <label class='flex items-start gap-2'>
-              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked} ${rastreadorGratuito ? "disabled" : ""} onchange="salvarRastreador(this.checked)">
-              <span>Quero rastreador por + R$30,00 por mês</span>
-            </label>
-            <label class='flex items-start gap-2'>
-              <input type='checkbox' id='adesivo' class='form-checkbox text-blue-500 mt-1' onchange="salvarAdesivo(this.checked)">
-              <span>Topo adesivar meu carro e ganhar desconto todo mês e outros benefícios</span>
-            </label>
-            <div class='mt-4 flex flex-col gap-2'>
-              <button type='button' onclick='salvarESeguir(false)' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
-            </div>
+          <div class='mt-4 flex flex-col gap-2'>
+            <button type='button' onclick='salvarESeguir(false)' class='w-full bg-blue-500 text-white py-2 rounded font-semibold'>Crie seu plano</button>
           </div>
         `;
       }
@@ -124,29 +114,7 @@
       window.location.href = "/contratacao?etapa=4";
     }
 
-    function planoBasico() {
-      const rastreador = document.getElementById('rastreador').checked;
-      const adesivo = document.getElementById('adesivo').checked;
-
-      let totalExtras = 0;
-      let beneficios = [];
-
-      if (rastreador) totalExtras += 30;
-
-      if (adesivo) {
-        beneficios.push("Desconto de R$ 20,00");
-        beneficios.push("VFLR incluso gratuitamente");
-        beneficios.push("Até R$1.000,00 de bônus na participação");
-        totalExtras -= 20;
-      }
-
-      alert(`Plano básico selecionado.\nExtras: R$ ${totalExtras.toFixed(2)}\nBenefícios: ${beneficios.join(", ")}`);
-    }
-
     function salvarESeguir(planoBasico) {
-      const rastreador = document.getElementById("rastreador") ? document.getElementById("rastreador").checked : false;
-      const adesivo = document.getElementById("adesivo") ? document.getElementById("adesivo").checked : false;
-
       // Garantir que os valores sejam salvos corretamente antes do redirecionamento
       const mensalidadeOriginal = localStorage.getItem("mensalidade_original") || "0";
       const mensalidadeComDesconto = localStorage.getItem("mensalidade_com_desconto") || "0";
@@ -155,8 +123,6 @@
 
       localStorage.setItem("mensalidade_original", mensalidadeOriginal);
       localStorage.setItem("mensalidade_com_desconto", mensalidadeComDesconto);
-      localStorage.setItem("rastreador_checkbox", rastreador);
-      localStorage.setItem("adesivo_checkbox", adesivo);
       localStorage.setItem("plano_basico", planoBasico);
       localStorage.setItem("valor_veiculo", valorVeiculo);
       localStorage.setItem("desconto_rastreador", descontoRastreador);
@@ -164,28 +130,12 @@
       window.location.href = "/contratacao";
     }
 
-    function salvarRastreador(checked) {
-      localStorage.setItem("rastreador_checkbox", checked);
-    }
-
-    function salvarAdesivo(checked) {
-      localStorage.setItem("adesivo_checkbox", checked);
-    }
-
-    function planoPersonalizado() {
-      alert("Funcionalidade de plano personalizado em construção...");
-    }
-
     function irParaContratacao(tipoPlano) {
-      const rastreador = document.getElementById('rastreador')?.checked || false;
-      const adesivo = document.getElementById('adesivo')?.checked || false;
       const categoria = document.getElementById('categoria')?.value || "";
       const fipe = document.getElementById('fipe')?.value || "";
 
       const params = new URLSearchParams({
         tipo: tipoPlano,
-        rastreador: rastreador ? "sim" : "nao",
-        adesivo: adesivo ? "sim" : "nao",
         categoria,
         fipe
       });
