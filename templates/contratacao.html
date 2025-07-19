@@ -21,10 +21,10 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="beneficiosContainer" style="display: none;">
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20" /> Desconto mensal de R$ 20,00
+          <input type="checkbox" name="beneficio" value="20" /> Desconto mensal de R$ 20,00
         </label>
         <label class="bg-white text-black rounded p-4 block">
-          <input type="checkbox" name="beneficio" value="-20" /> VFLR incluso gratuitamente
+          <input type="checkbox" name="beneficio" value="20" /> VFLR incluso gratuitamente
         </label>
         <label class="bg-white text-black rounded p-4 block">
           <input type="checkbox" name="beneficio" value="0" /> R$1.000,00 de desconto na participação
@@ -215,13 +215,6 @@
       document.getElementById("rastreadorSim").checked = true;
     }
 
-    // Adicionar evento para recalcular ao mudar o rastreador
-    document.querySelectorAll('input[name="rastreador"]').forEach(radio => {
-      radio.addEventListener("change", () => {
-        atualizarTotais();
-      });
-    });
-
     let adicionais = 0;
     const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
     camposExtras.forEach(campo => {
@@ -262,6 +255,13 @@
       el.innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
     });
   }
+
+  // Adicionar eventos de mudança para todos os planos
+  document.querySelectorAll('input[name="guincho"], input[name="terceiros"], input[name="vflr"], input[name="incendio"], input[name="bau"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+      atualizarTotais();
+    });
+  });
   
   function enviarFormulario() {
     const nome = document.getElementById("cliente_nome").value.trim();
