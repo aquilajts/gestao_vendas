@@ -39,13 +39,13 @@
       <button type="submit" class="w-full bg-white text-black py-2 rounded font-semibold">Realizar simulação</button>
       <button type="button" onclick="irParaEtapa4Frota()" class="w-full bg-white text-black py-2 rounded font-semibold">FROTA (5 ou mais veiculos)</button>
       <p class="text-xs text-center text-gray-400 mt-2">*Os valores precisam ser confirmados por um de nossos consultores, tais como eventuais descontos e promoções NÃO citados!*</p>
-      <p>Não sabe o valor da FIPE? Acesse: <a href="https://veiculos.fipe.org.br/" target="_blank" class="text-green-400">📞 Fipe.org</a></p>
     </form>
 
     <div id="resultado" class="mt-6 text-center"></div>
   </div>
 
   <footer class="text-center text-sm text-gray-300 mb-4">
+    <p>Não sabe a FIPE? Acesse: <a href="https://veiculos.fipe.org.br/" target="_blank" class="text-green-400">Fipe.org</a></p>
     <p>Contato direto com consultor: <a href="https://wa.me/5527996437717" target="_blank" class="text-green-400">📞 27 99643-7717</a></p>
   </footer>
 
@@ -112,7 +112,12 @@
         `;
       }
     });
-    
+    function irParaEtapa4Frota() {
+      // Redirecionar diretamente para Etapa 4 sem depender dos campos preenchidos
+      localStorage.setItem("plano_basico", "false"); // Apenas o mínimo necessário para frota
+      window.location.href = "/contratacao?etapa=4";
+    }
+        
     function planoBasico() {
       const rastreador = document.getElementById('rastreador').checked;
       const adesivo = document.getElementById('adesivo').checked;
