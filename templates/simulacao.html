@@ -37,8 +37,9 @@
         oninput="formatarMoeda(this)"
       >
       <button type="submit" class="w-full bg-white text-black py-2 rounded font-semibold">Realizar simulação</button>
-      <p class="text-xs text-center text-gray-400 mt-2">*Os valores precisam ser confirmados por um de nossos consultores, tais como eventuais descontos e promoções NÃO citados!
- > > Se desejar frota, informe na etapa de Dados*</p>
+      <button type="button" onclick="irParaEtapa4Frota()" class="w-full bg-white text-black py-2 rounded font-semibold">FROTA (5 ou mais veiculos)</button>
+      <p class="text-xs text-center text-gray-400 mt-2">*Os valores precisam ser confirmados por um de nossos consultores, tais como eventuais descontos e promoções NÃO citados!*</p>
+      <p>Não sabe o valor da FIPE? Acesse: <a href="https://veiculos.fipe.org.br/" target="_blank" class="text-green-400">📞 Fipe.org</a></p>
     </form>
 
     <div id="resultado" class="mt-6 text-center"></div>
@@ -99,10 +100,6 @@
           <p>🎯 Com desconto: <span class='font-bold text-yellow-400'>R$ ${resultado.comDesconto}</span></p>
           ${rastreadorInfo}
           <div class='mt-4 space-y-3'>
-            <label class='flex items-start gap-2'>
-              <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked}>
-              <span>Quero rastreador por + R$30,00 por mês</span>
-            </label>
             <label class='flex items-start gap-2'>
               <input type='checkbox' id='rastreador' class='form-checkbox text-blue-500 mt-1' ${rastreadorChecked} ${rastreadorGratuito ? "disabled" : ""}>
               <span>Quero rastreador por + R$30,00 por mês</span>
