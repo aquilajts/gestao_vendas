@@ -33,8 +33,8 @@
         <!-- Rastreador -->
         <div class="bg-white text-black rounded p-4">
           <h3 class="font-bold mb-2">Rastreador</h3>
-          <label class="block"><input type="radio" name="rastreador" value="0"> Não</label>
-          <label class="block"><input type="radio" name="rastreador" value="30"> Sim (R$30,00)</label>
+          <label class="block"><input type="radio" name="rastreador" value="0" id="rastreadorNao"> Não</label>
+          <label class="block"><input type="radio" name="rastreador" value="30" id="rastreadorSim"> Sim (R$30,00)</label>
         </div>
       </div>
 
@@ -150,11 +150,13 @@
   function irParaEtapa1() {
     esconderEtapas();
     document.getElementById("etapa1").classList.remove("hidden");
+    atualizarTotais();
   }
 
   function irParaEtapa2() {
     esconderEtapas();
     document.getElementById("etapa2").classList.remove("hidden");
+    atualizarTotais();
   }
 
   function irParaEtapa3() {
@@ -169,6 +171,18 @@
     atualizarTotais();
   }
 
+  function voltarEtapa1() {
+    esconderEtapas();
+    document.getElementById("etapa1").classList.remove("hidden");
+    atualizarTotais();
+  }
+
+  function voltarEtapa3() {
+    esconderEtapas();
+    document.getElementById("etapa3").classList.remove("hidden");
+    atualizarTotais();
+  }
+
   function esconderEtapas() {
     ["etapa1", "etapa2", "etapa3", "etapa4"].forEach(id => {
       const el = document.getElementById(id);
@@ -178,29 +192,41 @@
 
   function atualizarTotais() {
     const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+    const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
+    const rastreadorCheckbox = localStorage.getItem("rastreador_checkbox") === "true";
+    const adesivoCheckbox = localStorage.getItem("adesivo_checkbox") === "true";
+    const descontoRastreador = parseFloat(localStorage.getItem("desconto_rastreador")) || 0;
+
+    // Configurar rastreador automaticamente
+    if (valorVeiculo >= 70000) {
+      document.getElementById("rastreadorSim").checked = true;
+    } else if (rastreadorCheckbox) {
+      document.getElementById("rastreadorSim").checked = true;
+    } else {
+      document.getElementById("rastreadorNao").checked = true;
+    }
 
     let adicionais = 0;
     const camposExtras = ["guincho", "terceiros", "rastreador", "vflr", "incendio", "bau"];
     camposExtras.forEach(campo => {
-      const selecionado = document.querySelector(`input[name=${campo}]:checked`);
+      const selecionado = document.querySelector(`input[name="${campo}"]:checked`);
       if (selecionado) adicionais += parseFloat(selecionado.value) || 0;
     });
 
     let descontos = 0;
-    const adesivoAtivo = document.getElementById("adesivo")?.checked;
-    if (adesivoAtivo) {
+    if (adesivoCheckbox) {
       const beneficios = document.querySelectorAll('input[name="beneficio"]:checked');
       beneficios.forEach(b => {
         descontos += parseFloat(b.value) || 0;
       });
     }
-    descontos += descontoRastreador; // Desconto do rastreador
-    
-    const subtotal = mensalidadeComDesconto + adicionais + descontos;
+    descontos += (rastreadorCheckbox && valorVeiculo < 70000 ? 0 : descontoRastreador); // Desconto só se não for gratuito
+
+    const subtotal = mensalidadeComDesconto + adicionais - descontos;
 
     // Atualiza visuais
     document.getElementById("subtotalSeguro").innerHTML = `Seguro: <span class="text-red-400 font-bold">R$ ${mensalidadeComDesconto.toFixed(2)}</span>`;
-    document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${(-descontos).toFixed(2)}</span>`;
+    document.getElementById("subtotalDesconto").innerHTML = `Descontos: <span class="text-green-300 font-bold">- R$ ${descontos.toFixed(2)}</span>`;
     document.getElementById("subtotalAdicionais").innerHTML = `Adicionais: <span class="text-red-400 font-bold">R$ ${adicionais.toFixed(2)}</span>`;
     document.getElementById("subtotalFinal").innerHTML = `Subtotal Final: <span class="text-white font-bold">R$ ${subtotal.toFixed(2)}</span>`;
   }
@@ -218,12 +244,12 @@
     const telefonePessoal = document.getElementById("cliente_telefone_pessoal").value.trim();
     const telefoneRecado = document.getElementById("cliente_telefone_recado").value.trim();
     const email = document.getElementById("cliente_email").value.trim();
-  
+
     if (!nome || !telefone || !placa) {
       alert("Preencha todos os campos obrigatórios.");
       return;
     }
-  
+
     // Obter subtotal final e opções escolhidas
     const subtotalFinal = parseFloat(document.getElementById("subtotalFinal").textContent.split("R$ ")[1]) || 0;
     const guincho = document.querySelector('input[name="guincho"]:checked')?.nextSibling.textContent.trim() || "200KM (R$0,00)";
@@ -234,16 +260,16 @@
     const bau = document.querySelector('input[name="bau"]:checked')?.nextSibling.textContent.trim() || "Não (R$0,00)";
     const adesivo = document.getElementById("adesivo").checked ? "Sim" : "Não";
     const beneficios = Array.from(document.querySelectorAll('input[name="beneficio"]:checked')).map(b => b.nextSibling.textContent.trim()).join(", ") || "Nenhum";
-  
+
     // Formatar mensagem para WhatsApp
-    let mensagem = `Olá Áquila, tudo bem?\n`;
+    let mensagem = "Olá Áquila, tudo bem?\n";
     if (localStorage.getItem("plano_basico") === "false" && localStorage.getItem("mensalidade_original") === "0") {
-      mensagem += `Desejo uma cotação da minha frota, [...]\n`;
+      mensagem += "Desejo uma cotação da minha frota, [...]\n";
     } else {
       mensagem += `Realizei uma simulação e gostei da oferta! O valor final ficou em R$ ${subtotalFinal.toFixed(2)}, com as seguintes opções:\n`;
     }
     mensagem += `- Guincho: ${guincho}\n- Proteção a Terceiros: ${terceiros}\n- Rastreador: ${rastreador}\n- VFLR: ${vflr}\n- Incêndio e Alagamento: ${incendio}\n- Proteção para Baú: ${bau}\n- Adesivo: ${adesivo}\n- Benefícios: ${beneficios}\n\n`;
-    mensagem += `Segue meus dados:\n`;
+    mensagem += "Segue meus dados:\n";
     mensagem += `*Nome completo:* ${nome || "Não informado"}\n`;
     mensagem += `*Telefone:* ${telefone || "Não informado"}\n`;
     mensagem += `*Placa:* ${placa || "Não informado"}\n`;
@@ -256,8 +282,8 @@
     mensagem += `*Telefone pessoal:* ${telefonePessoal || "Não informado"}\n`;
     mensagem += `*Telefone de recado:* ${telefoneRecado || "Não informado"}\n`;
     mensagem += `*E-mail:* ${email || "Não informado"}\n\n`;
-    mensagem += `Para finalizar, gostaria de saber se há alguma campanha ativa no momento. Já estou pronto para providenciar meu documento com foto (CNH ou RG) e o documento do veículo!`;
-  
+    mensagem += "Para finalizar, gostaria de saber se há alguma campanha ativa no momento. Já estou pronto para providenciar meu documento com foto (CNH ou RG) e o documento do veículo!";
+
     // Armazenar dados no localStorage
     localStorage.setItem("cliente_nome", nome);
     localStorage.setItem("cliente_telefone", telefone);
@@ -271,9 +297,9 @@
     localStorage.setItem("cliente_telefone_pessoal", telefonePessoal);
     localStorage.setItem("cliente_telefone_recado", telefoneRecado);
     localStorage.setItem("cliente_email", email);
-  
+
     // Direcionar para WhatsApp
-    const numeroWhatsApp = "5527996437717"; // Número do consultor com código do país
+    const numeroWhatsApp = "5527996437717";
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
     window.open(urlWhatsApp, '_blank');
   }
@@ -326,11 +352,7 @@
       irParaEtapa1();
     }
 
-    // Marcação automática do rastreador se valor do veículo > R$ 70.000
-    if (valorVeiculo > 70000) {
-      document.querySelector('input[name="rastreador"][value="30"]').checked = true;
-    }
-
+    // Garantir que a função atualizarTotais seja chamada na inicialização
     atualizarTotais();
   };
 </script>
