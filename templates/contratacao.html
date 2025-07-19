@@ -338,6 +338,7 @@
   }
 
   // Inicialização
+  // Inicialização
   window.onload = () => {
     const planoBasico = localStorage.getItem("plano_basico") === "true";
     const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
@@ -348,7 +349,10 @@
       localStorage.setItem("mensalidade_com_desconto", mensalidadeComDesconto.toFixed(2));
     }
 
-    // Plano Básico pula etapas
+    // Sempre inicia na Etapa 1
+    irParaEtapa1();
+
+    // Aplicar seleções automáticas para plano básico
     if (planoBasico) {
       document.querySelector('input[name="guincho"][value="0"]').checked = true;
       document.querySelector('input[name="terceiros"][value="0"]').checked = true;
@@ -356,9 +360,7 @@
       document.querySelector('input[name="incendio"][value="0"]').checked = true;
       document.querySelector('input[name="bau"][value="0"]').checked = true;
       document.querySelector('input[name="rastreador"][value="0"]').checked = true;
-      irParaEtapa1(); // Ajustado para ir para Etapa 1 (Adesivo)
-    } else {
-      irParaEtapa1();
+      atualizarTotais(); // Atualiza totais após seleções automáticas
     }
 
     // Inicializar os benefícios com base no estado do checkbox
@@ -372,7 +374,7 @@
     atualizarTotais();
   };
   
-    function atualizarBeneficios() {
+function atualizarBeneficios() {
       const adesivoCheckbox = document.getElementById("adesivo").checked;
       const beneficiosContainer = document.getElementById("beneficiosContainer");
       const beneficios = document.querySelectorAll('input[name="beneficio"]');
@@ -388,20 +390,22 @@
       atualizarTotais();
     }
 
-    // Função específica para sincronizar VFLR
+    // Função específica para sincronizar VFLR (apenas como cortesia se selecionado)
     function sincronizarVFLR() {
-      const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
+      const vflrBeneficio = document.querySelector('input[name="beneficio"][value="20"]:nth-child(2)'); // Ajustado para "VFLR incluso gratuitamente"
       const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
-      if (vflrBeneficio && vflrSim) {
-        vflrSim.checked = vflrBeneficio.checked; // Sincroniza diretamente o estado
+      if (vflrBeneficio && vflrSim && document.getElementById("etapa3") && !document.getElementById("etapa3").classList.contains("hidden")) {
+        if (vflrBeneficio.checked) {
+          vflrSim.checked = true; // Marca "Sim" automaticamente como cortesia
+        }
       }
     }
 
     // Adicionar evento de mudança para benefícios para manter VFLR sincronizado e atualizar totais
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
-        sincronizarVFLR(); // Chama a função específica para sincronizar VFLR
-        atualizarTotais(); // Atualiza os totais
+        sincronizarVFLR();
+        atualizarTotais();
       });
     });
   
