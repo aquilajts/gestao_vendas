@@ -337,7 +337,6 @@
   }
 
   // Inicialização
-  // Inicialização
   window.onload = () => {
     const planoBasico = localStorage.getItem("plano_basico") === "true";
     const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
@@ -353,6 +352,13 @@
       irParaEtapa1(); // Ajustado para ir para Etapa 1 (Adesivo)
     } else {
       irParaEtapa1();
+    }
+
+    // Inicializar os benefícios com base no estado do checkbox
+    const adesivoCheckbox = document.getElementById("adesivo");
+    if (adesivoCheckbox) {
+      atualizarBeneficios(); // Chama a função para exibir ou ocultar os benefícios
+      adesivoCheckbox.addEventListener("change", atualizarBeneficios); // Associa o evento de mudança
     }
 
     atualizarTotais();
