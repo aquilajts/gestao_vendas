@@ -340,6 +340,12 @@
   window.onload = () => {
     const planoBasico = localStorage.getItem("plano_basico") === "true";
     const valorVeiculo = parseFloat(localStorage.getItem("valor_veiculo")) || 0;
+    const mensalidadeComDesconto = parseFloat(localStorage.getItem("mensalidade_com_desconto")) || 0;
+
+    // Garantir que os valores sejam carregados do localStorage
+    if (mensalidadeComDesconto > 0) {
+      localStorage.setItem("mensalidade_com_desconto", mensalidadeComDesconto.toFixed(2));
+    }
 
     // Plano Básico pula etapas
     if (planoBasico) {
@@ -361,35 +367,10 @@
       adesivoCheckbox.addEventListener("change", atualizarBeneficios); // Associa o evento de mudança
     }
 
+    // Forçar atualização dos totais com os valores carregados
     atualizarTotais();
   };
   
-    document.getElementById("adesivo")?.addEventListener("change", () => {
-      const ativo = document.getElementById("adesivo").checked;
-      beneficios.forEach(opt => {
-        opt.disabled = !ativo;
-        if (!ativo) opt.checked = false;
-      });
-      localStorage.setItem("adesivo_checkbox", ativo);
-      atualizarTotais();
-    });
-
-    // Plano Básico pula etapas
-    if (planoBasico) {
-      document.querySelector('input[name="guincho"][value="0"]').checked = true;
-      document.querySelector('input[name="terceiros"][value="0"]').checked = true;
-      document.querySelector('input[name="vflr"][value="0"]').checked = true;
-      document.querySelector('input[name="incendio"][value="0"]').checked = true;
-      document.querySelector('input[name="bau"][value="0"]').checked = true;
-      document.querySelector('input[name="rastreador"][value="0"]').checked = true;
-      irParaEtapa3();
-    } else {
-      irParaEtapa1();
-    }
-
-    // Garantir que a função atualizarTotais seja chamada na inicialização
-    atualizarTotais();
-  };
     function atualizarBeneficios() {
       const adesivoCheckbox = document.getElementById("adesivo").checked;
       const beneficiosContainer = document.getElementById("beneficiosContainer");
