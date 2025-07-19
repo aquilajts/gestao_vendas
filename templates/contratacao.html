@@ -382,15 +382,11 @@
         if (!adesivoCheckbox) b.checked = false; // Desmarca apenas se desativado
       });
 
-      // Verificar se VFLR incluso gratuitamente foi selecionado e sincronizar
+      // Verificar e sincronizar VFLR imediatamente
       const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
       const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
       if (vflrBeneficio && vflrSim) {
-        if (vflrBeneficio.checked) {
-          vflrSim.checked = true;
-        } else if (!vflrBeneficio.checked) {
-          vflrSim.checked = false;
-        }
+        vflrSim.checked = vflrBeneficio.checked; // Sincroniza diretamente o estado
       }
       atualizarTotais();
     }
@@ -398,30 +394,7 @@
     // Adicionar evento de mudança para benefícios para manter VFLR sincronizado e atualizar totais
     document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
       checkbox.addEventListener("change", () => {
-        const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
-        const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
-        if (vflrBeneficio && vflrSim) {
-          if (vflrBeneficio.checked) {
-            vflrSim.checked = true;
-          } else if (!vflrBeneficio.checked) {
-            vflrSim.checked = false;
-          }
-        }
-        atualizarTotais();
-      });
-    });
-  
-      // Adicionar evento de mudança para benefícios para manter VFLR sincronizado
-    document.querySelectorAll('input[name="beneficio"]').forEach(checkbox => {
-      checkbox.addEventListener("change", () => {
-        const vflrBeneficio = document.querySelector('input[name="beneficio"][value="-20"]:nth-child(2)');
-        const vflrSim = document.querySelector('input[name="vflr"][value="20"]');
-        if (vflrBeneficio && vflrBeneficio.checked && vflrSim) {
-          vflrSim.checked = true;
-        } else if (vflrSim && !vflrBeneficio.checked) {
-          vflrSim.checked = false; // Desmarca se o benefício VFLR for desmarcado
-        }
-        atualizarTotais();
+        atualizarBeneficios(); // Chama a função completa para sincronizar e atualizar
       });
     });
 
